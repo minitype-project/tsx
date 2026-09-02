@@ -1,0 +1,57 @@
+{
+  "name": "@minitype/tsx",
+  "version": "0.1.0",
+  "description": "JSX/TSX support for minitype",
+  "author": "Yuto Wada",
+  "license": "MIT",
+  "homepage": "https://typeset.jp",
+  "keywords": [
+    "minitype",
+    "typesetting",
+    "jsx",
+    "tsx",
+    "pdf"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/jsx-runtime.d.ts",
+      "import": "./dist/jsx-runtime.js",
+      "default": "./dist/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./dist/jsx-dev-runtime.d.ts",
+      "import": "./dist/jsx-dev-runtime.js",
+      "default": "./dist/jsx-dev-runtime.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "biome check ./src --write",
+    "license": "addlicense -f .license-header.txt -ignore \"src/templates/**\" src/",
+    "license:check": "addlicense -check -f .license-header.txt -ignore \"src/templates/**\" src/",
+    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 2",
+    "prepare": "husky"
+  },
+  "peerDependencies": {
+    "@minitype/minitype": ">=0.1.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.4",
+    "@minitype/minitype": "^0.1.4",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
