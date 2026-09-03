@@ -1,7 +1,7 @@
 # @minitype/tsx
 
 [minitype](https://typeset.jp) の JSX/TSX サポートパッケージです．
-JSX 記法を用いた minitype の文書記述を実現ようコンポーネント群および JSX ランタイムを提供します．
+JSX 記法を用いた minitype の文書記述を実現するコンポーネント群および JSX ランタイムを提供します．
 
 **@minitype/tsx** is a JSX/TSX support package for [minitype](https://typeset.jp).
 It provides a set of components and a JSX runtime for writing typesetting documents in JSX syntax.
@@ -36,18 +36,20 @@ yarn add @minitype/tsx
 `.tsx` ファイルに JSX を使って組版ドキュメントを記述します．
 `<Document>` をルート要素として，その中に `<Group>`（グループ）を配置します．
 グループの中にブロック要素を配置して，ブロック要素の中にインライン要素を配置します．
+最後に `minitypeJSX()` へ渡すことで PDF を出力します．
 
-詳細なコンポーネントについては，[コンポーネント一覧](./docs/component.md)　を，実際の @minitype/tsx の使用例については [sample/index.tsx](./sample/index.tsx) を参照してください．
+詳細なコンポーネントについては [コンポーネント一覧](./docs/component.md) を，実際の使用例については [sample/index.tsx](./sample/index.tsx) を参照してください．
 
 ```tsx
-import { cmyk, minitype } from "@minitype/minitype";
+import { cmyk } from "@minitype/minitype";
 import {
-  B, Caption, Cell, Code, Color, Document, Footnote, Fn, Group,
-  H1, H2, Image, Li1, Li2, Math, Ol1, Ol2, P, Row, Ruby, Table, Url,
+  B, Caption, Cell, Code, Color, Document, Fn, Footnote, Group,
+  H1, H2, Image, Li1, Li2, MathBlock, minitypeJSX,
+  Ol1, Ol2, P, Row, Ruby, Table, Url,
 } from "@minitype/tsx";
 
-const { groups, style } = (
-  <Document style={{ size: { width: 210, height: 297 }, writingMode: "horizontal-tb" }}>
+const document = (
+  <Document style={{ size: { width: 210, height: 297 }, writingMode: "horizontal" }}>
     <Group>
       <H1>minitype</H1>
 
@@ -69,8 +71,8 @@ const { groups, style } = (
       <Ol2>順序付きリスト（第 2 レベル）</Ol2>
 
       <H2>コードブロック，数式</H2>
-      <Code lang="ts">const result = minitype(groups, style);</Code>
-      <Math>{"E = mc^2"}</Math>
+      <Code lang="ts">const result = minitypeJSX(document);</Code>
+      <MathBlock>{"E = mc^2"}</MathBlock>
 
       <H2>テーブル</H2>
       <Table>
@@ -91,7 +93,7 @@ const { groups, style } = (
   </Document>
 );
 
-await minitype(groups, style).save("output.pdf");
+await minitypeJSX(document, { fontDir: "./fonts" }).save("output.pdf");
 ```
 
 ## ライセンス・謝辞

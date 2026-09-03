@@ -1,4 +1,4 @@
-import { cmyk, minitype } from "@minitype/minitype";
+import { cmyk } from "@minitype/minitype";
 import {
   B,
   Caption,
@@ -6,7 +6,6 @@ import {
   Code,
   Color,
   Document,
-  type DocumentResult,
   Fn,
   Footnote,
   Group,
@@ -15,7 +14,8 @@ import {
   Image,
   Li1,
   Li2,
-  Math,
+  MathBlock,
+  minitypeJSX,
   Ol1,
   Ol2,
   P,
@@ -25,9 +25,9 @@ import {
   Url,
 } from "@minitype/tsx";
 
-const { groups, style } = (
+const document = (
   <Document
-    style={{ size: { width: 210, height: 297 }, writingMode: "horizontal-tb" }}
+    style={{ size: { width: 210, height: 297 }, writingMode: "horizontal" }}
   >
     <Group>
       <H1>minitype</H1>
@@ -51,8 +51,8 @@ const { groups, style } = (
       <Ol2>順序付きリスト（第 2 レベル）</Ol2>
 
       <H2>コードブロック，数式</H2>
-      <Code lang="ts">const result = minitype(groups, style);</Code>
-      <Math>{"E = mc^2"}</Math>
+      <Code lang="ts">const result = minitypeJSX(document);</Code>
+      <MathBlock>{"E = mc^2"}</MathBlock>
 
       <H2>テーブル</H2>
       <Table>
@@ -81,5 +81,5 @@ const { groups, style } = (
   </Document>
 );
 
-await minitype(groups, style, { fontDir: "./fonts" }).save("output.pdf");
+await minitypeJSX(document, { fontDir: "./fonts" }).save("output.pdf");
 console.log("Saved to output.pdf");

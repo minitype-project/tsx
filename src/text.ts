@@ -250,8 +250,7 @@ export interface MathProps extends AbstractBlockProps {
 /**
  * 数式ブロック（LaTeX）．
  */
-// biome-ignore lint/suspicious/noShadowRestrictedNames: コンポーネント名として必要
-export const Math = ({
+export const MathBlock = ({
   children,
   style,
   label,
