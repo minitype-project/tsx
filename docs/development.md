@@ -9,6 +9,9 @@ yarn build
 # フォーマット（biome）
 yarn check
 
+# サンプル PDF を生成（sample/output.pdf に出力）
+yarn sample
+
 # ライセンスヘッダの付与・検証（addlicense）
 yarn license        # ライセンスヘッダを付与
 yarn license:check  # ライセンスヘッダの付与状況を確認

@@ -1,6 +1,7 @@
-import { cmyk } from "@minitype/minitype";
+import { cmyk, em, fill, fr, physical, Q } from "@minitype/minitype";
 import {
   B,
+  Box,
   Caption,
   Cell,
   Code,
@@ -27,10 +28,45 @@ import {
 
 const document = (
   <Document
-    style={{ size: { width: 210, height: 297 }, writingMode: "horizontal" }}
+    style={{
+      size: "A4",
+      writingMode: "horizontal",
+      padding: physical(25, 25),
+      block: {
+        paragraph: {
+          size: Q(16),
+          firstIndent: em(1),
+          lineHeight: em(1.6),
+        },
+        h1: {
+          size: Q(24),
+          font: "SourceHanSansJP-Bold",
+          align: "center",
+        },
+        h2: {
+          size: Q(20),
+          font: "SourceHanSansJP-Bold",
+        },
+        code: {
+          font: "SourceCodePro-Regular",
+        },
+        caption: {
+          size: Q(14),
+          font: "SourceHanSansJP-Regular",
+          align: "center",
+        },
+      },
+      gaps: [
+        ["h1", "fallback", 8],
+        ["h2", "fallback", 4],
+        ["fallback", "h2", 8],
+        ["paragraph", "paragraph", 2],
+        ["fallback", "fallback", 4],
+      ],
+    }}
   >
     <Group>
-      <H1>minitype</H1>
+      <H1 unnumbered>minitype</H1>
 
       <H2>テキストとインライン要素</H2>
       <P>
@@ -51,11 +87,25 @@ const document = (
       <Ol2>順序付きリスト（第 2 レベル）</Ol2>
 
       <H2>コードブロック，数式</H2>
-      <Code lang="ts">const result = minitypeJSX(document);</Code>
+      <Box
+        style={{
+          background: [fill(cmyk(0, 0, 0, 6))],
+          padding: physical(3, 4),
+        }}
+      >
+        <Code lang="ts">const result = minitypeJSX(document);</Code>
+      </Box>
       <MathBlock>{"E = mc^2"}</MathBlock>
 
       <H2>テーブル</H2>
-      <Table>
+      <Table
+        style={{
+          columnWidths: [fr(1), fr(3)],
+          cellPadding: physical(2, 4),
+          textStyle: (rowIndex) =>
+            rowIndex === 0 ? { font: "SourceHanSansJP-Bold" } : {},
+        }}
+      >
         <Row>
           <Cell>
             <P>名前</P>
