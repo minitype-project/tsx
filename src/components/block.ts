@@ -21,12 +21,12 @@ import {
   collectCells,
   collectRows,
   collectSingleBlock,
-} from "./children.js";
+} from "../children.js";
 import type {
   BlockChildren,
   RowChildren,
   TableChildren,
-} from "./jsx-runtime.js";
+} from "../jsx-runtime.js";
 
 /**
  * ブロック要素の共通 Props．

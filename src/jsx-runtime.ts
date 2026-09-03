@@ -8,6 +8,7 @@ import type {
   Block,
   BlockExtender,
   DocumentStyle,
+  Flow,
   Group,
   InlineOrExtender,
   TableCell,
@@ -39,6 +40,7 @@ export interface DocumentResult {
  */
 export type JsxElement =
   | DocumentResult
+  | Flow
   | Block
   | InlineOrExtender
   | LineBreak
@@ -69,6 +71,18 @@ export type BlockChildren =
   | Block
   | BlockExtender
   | BlockChildren[]
+  | JsxElement
+  | Falsy;
+
+/**
+ * グループ本文の children 型．
+ * `<Group>` に使用する．{@link BlockChildren} に加えて {@link Flow} を受け付ける．
+ */
+export type BodyChildren =
+  | Flow
+  | Block
+  | BlockExtender
+  | BodyChildren[]
   | JsxElement
   | Falsy;
 

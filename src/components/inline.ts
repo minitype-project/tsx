@@ -14,8 +14,8 @@ import type {
   Command as MinitypeCommand,
 } from "@minitype/minitype";
 import * as minitype from "@minitype/minitype";
-import { collectInlineSegments, collectInlines } from "./children.js";
-import type { InlineChildren, LineBreak } from "./jsx-runtime.js";
+import { collectInlineSegments, collectInlines } from "../children.js";
+import type { InlineChildren, LineBreak } from "../jsx-runtime.js";
 
 type InlineSegments =
   | minitype.InlineOrExtender

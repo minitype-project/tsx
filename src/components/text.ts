@@ -12,9 +12,9 @@ import type {
   MathStyle,
   TextStyle,
 } from "@minitype/minitype";
+import { collectInlineLines } from "../children.js";
+import type { InlineChildren } from "../jsx-runtime.js";
 import type { AbstractBlockProps } from "./block.js";
-import { collectInlineLines } from "./children.js";
-import type { InlineChildren } from "./jsx-runtime.js";
 
 /**
  * テキスト系ブロックコンポーネント（{@link P}，{@link H1} 等）の共通 Props．

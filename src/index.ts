@@ -4,10 +4,10 @@
  * https://opensource.org/licenses/MIT
  */
 
-export * from "./block.js";
-export * from "./document.js";
-export * from "./inline.js";
-export * from "./inline-control.js";
+export * from "./components/block.js";
+export * from "./components/document.js";
+export * from "./components/inline.js";
+export * from "./components/inline-control.js";
+export * from "./components/text.js";
 export type { JsxElement } from "./jsx-runtime.js";
-export * from "./text.js";
 export * from "./typeset.js";

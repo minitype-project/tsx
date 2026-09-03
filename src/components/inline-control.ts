@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { fn } from "@minitype/minitype";
-import type { LineBreak } from "./jsx-runtime.js";
+import type { LineBreak } from "../jsx-runtime.js";
 
 /**
  * 行区切り．`InlineOrExtender[][]` における行の境界を作る．

@@ -7,6 +7,7 @@
 import type {
   Block,
   BlockExtender,
+  Flow,
   Group,
   InlineOrExtender,
   TableCell,
@@ -14,12 +15,14 @@ import type {
 import {
   isBlock,
   isBlockExtender,
+  isFlow,
   isGroup,
   isInline,
   isTableCell,
 } from "@minitype/minitype";
 import type {
   BlockChildren,
+  BodyChildren,
   GroupChildren,
   InlineChildren,
   LineBreak,
@@ -169,6 +172,41 @@ export const collectBlocks = (
 
   for (const child of flat) {
     if (isIgnored(child)) {
+      continue;
+    }
+    if (isBlock(child) || isBlockExtender(child as Block | BlockExtender)) {
+      result.push(child as Block | BlockExtender);
+      continue;
+    }
+    if (isInline(child)) {
+      throw new Error(
+        `Invalid JSX structure: "${inlineLabel(child)}" cannot be placed in a block context.`,
+      );
+    }
+    throw new Error(
+      "Invalid JSX structure: unexpected child in block context.",
+    );
+  }
+
+  return result;
+};
+
+/**
+ * JSX の children をグループ本文（Block，BlockExtender，Flow）の配列に変換する．
+ * {@link Group} の children に使用する．
+ */
+export const collectBody = (
+  children: BodyChildren,
+): (Block | BlockExtender | Flow)[] => {
+  const flat = flattenJsxChildren(children);
+  const result: (Block | BlockExtender | Flow)[] = [];
+
+  for (const child of flat) {
+    if (isIgnored(child)) {
+      continue;
+    }
+    if (isFlow(child)) {
+      result.push(child);
       continue;
     }
     if (isBlock(child) || isBlockExtender(child as Block | BlockExtender)) {
