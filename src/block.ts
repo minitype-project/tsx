@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2026 Yuto Wada.
+ * Released under the MIT License.
+ * https://opensource.org/licenses/MIT
+ */
+
 import type * as minitype from "@minitype/minitype";
 import type {
   BlockExtender,
@@ -64,9 +70,9 @@ export const Image = ({
  * {@link Rect}・{@link Ellipse} コンポーネントの Props．
  */
 export interface RectProps extends AbstractBlockProps {
-  /** 幅（pt）．*/
+  /** 幅（mm）．*/
   width: number;
-  /** 高さ（pt）．*/
+  /** 高さ（mm）．*/
   height: number;
   /** 図形スタイル．*/
   style?: Partial<ShapeStyle>;
@@ -146,7 +152,7 @@ export const NewColumn = makePageControl("newcolumn");
  * {@link Vspace}・{@link Addvspace} コンポーネントの Props．
  */
 export interface VspaceProps extends AbstractBlockProps {
-  /** スペース量（pt）．*/
+  /** スペース量（mm）．*/
   space: number;
 }
 
@@ -361,9 +367,9 @@ export const Float = ({
 export interface MoveProps extends AbstractBlockProps {
   /** 子要素（ブロック）．*/
   children?: BlockChildren;
-  /** インライン方向のオフセット（pt）．*/
+  /** インライン方向のオフセット（mm）．*/
   inlineOffset?: number;
-  /** ブロック方向のオフセット（pt）．*/
+  /** ブロック方向のオフセット（mm）．*/
   blockOffset?: number;
 }
 

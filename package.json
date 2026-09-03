@@ -38,7 +38,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "check": "biome check ./src --write",
     "license": "addlicense -f .license-header.txt -ignore \"src/templates/**\" src/",
     "license:check": "addlicense -check -f .license-header.txt -ignore \"src/templates/**\" src/",

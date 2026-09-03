@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2026 Yuto Wada.
+ * Released under the MIT License.
+ * https://opensource.org/licenses/MIT
+ */
+
 import type {
   CommandStyle,
   Em,
@@ -94,7 +100,7 @@ export const Color = ({ children, value }: ColorProps): InlineSegments => {
 export interface FontSizeProps {
   /** 子要素（インライン）．*/
   children?: InlineChildren;
-  /** 文字サイズ（pt）．*/
+  /** 文字サイズ（mm）．*/
   size: number;
 }
 

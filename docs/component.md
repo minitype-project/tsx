@@ -12,17 +12,6 @@
 | `style?` | `Partial<DocumentStyle>` | ドキュメント全体のスタイル |
 | `children?` | `GroupChildren` | `<Group>` 要素 |
 
-`DocumentStyle` の主なフィールド：
-
-| フィールド | 型 | 説明 |
-| --- | --- | --- |
-| `size` | `PageSize` | ページサイズ（mm）．`{ width, height }` |
-| `padding` | `Padding \| (pageIndex: number) => Padding` | ページの余白（mm）．`{ top, bottom, left, right }` |
-| `writingMode` | `"horizontal-tb" \| "vertical-rl"` | 書字方向 |
-| `block` | `BlockStyleRecord` | ブロック種別ごとのデフォルトスタイル |
-| `command` | `CommandStyleRecord` | `<Command name="...">` のスタイル定義 |
-| `gaps` | `Gap[]` | ブロック間のギャップ定義 |
-
 ```tsx
 <Document
   style={{
@@ -65,25 +54,13 @@
 | `style?` | `Partial<TextStyle>` | テキストスタイル |
 | `children?` | `InlineChildren` | インライン要素またはテキスト |
 
-`TextStyle` の主なフィールド：
-
-| フィールド | 型 | 説明 |
-| --- | --- | --- |
-| `size` | `number` | フォントサイズ（mm） |
-| `font` | `string \| CompositeFont` | フォントファイル名または合成フォント設定 |
-| `lineHeight` | `number \| Em` | 行送り |
-| `align` | `TextAlign \| (pageIndex: number) => TextAlign` | 行揃え |
-| `indent` | `number \| Em` | インデント幅 |
-| `firstIndent` | `number \| Em` | 段落先頭のインデント幅 |
-| `effects` | `Effect[]` | 文字エフェクト（塗り・ストローク）のレイヤ |
-| `kerning` | `boolean` | カーニングを有効にするかどうか |
-| `splitable` | `boolean` | 段またはページをまたいで分割可能かどうか |
-| `gyodori` | `number \| (lineCount: number) => number` | 行取り |
-| `dropCap` | `DropCapStyle` | ドロップキャップの設定 |
-
 #### `<H1>` `<H2>` `<H3>` `<H4>`
 
-見出し（レベル 1〜4）．Props は `<P>` と同じ．
+見出し（レベル 1〜4）．`<P>` の Props に加えて以下を持つ．
+
+| Prop | 型 | 説明 |
+| --- | --- | --- |
+| `unnumbered?` | `boolean` | `true` を指定すると番号を付与しない |
 
 #### `<Caption>`
 
@@ -98,15 +75,6 @@
 | `lang?` | `string` | シンタックスハイライトの言語 |
 | `style?` | `Partial<TextStyle & CodeStyle>` | テキストスタイル + コードスタイル |
 | `children?` | `InlineChildren` | コードテキスト |
-
-`CodeStyle` の主なフィールド：
-
-| フィールド | 型 | 説明 |
-| --- | --- | --- |
-| `highlight` | `HighlightTheme \| HighlightJsThemes` | シンタックスハイライトのテーマ |
-| `color` | `Color` | デフォルト文字色 |
-| `boldFont` | `string` | bold テキスト用フォント |
-| `italicFont` | `string` | italic テキスト用フォント |
 
 ```tsx
 <Code lang="ts">{`const x: number = 42;`}</Code>
@@ -134,12 +102,6 @@
 | `style?` | `Partial<TextStyle & ListStyle>` | テキストスタイル + リストスタイル |
 | `children?` | `InlineChildren` | インライン要素またはテキスト |
 
-`ListStyle` のフィールド：
-
-| フィールド | 型 | 説明 |
-| --- | --- | --- |
-| `marker` | `InlineOrExtender \| ListMarkerFunction` | リストマーカ |
-
 #### `<Ol1>` `<Ol2>` `<Ol3>`
 
 順序付きリスト（レベル 1〜3）．Props は `<Li1>` と同じ．
@@ -153,15 +115,6 @@
 | `label` | `string` | 脚注のラベル（`<Fn>` と対応させる） |
 | `style?` | `Partial<TextStyle & FootnoteStyle>` | テキストスタイル + 脚注スタイル |
 | `children?` | `InlineChildren` | インライン要素またはテキスト |
-
-`FootnoteStyle` のフィールド：
-
-| フィールド | 型 | 説明 |
-| --- | --- | --- |
-| `separatorWidth` | `number \| Ratio` | 区切り線の幅 |
-| `separatorLineWidth` | `number` | 区切り線の線幅（mm） |
-| `separatorLineColor` | `Color` | 区切り線の色 |
-| `separatorOffset` | `number` | 区切り線のオフセット（mm） |
 
 ```tsx
 <P>本文テキスト<Fn label="note-1" />．</P>
@@ -180,19 +133,6 @@
 | --- | --- | --- |
 | `style?` | `Partial<TableStyle>` | テーブルスタイル |
 | `children?` | `TableChildren` | `<Row>` 要素 |
-
-`TableStyle` の主なフィールド：
-
-| フィールド | 型 | 説明 |
-| --- | --- | --- |
-| `align` | `Align` | テーブルの配置方向 |
-| `columnWidths` | `(number \| Ratio \| Fr)[] \| (columnIndex: number) => number \| Ratio \| Fr` | 列の幅 |
-| `horizontalBorders` | `Border \| (rowIndex: number, rowCount: number) => Border` | 横罫線 |
-| `verticalBorders` | `Border \| (columnIndex: number, columnCount: number) => Border` | 縦罫線 |
-| `cellPadding` | `DynamicPadding \| (rowIndex: number, columnIndex: number) => DynamicPadding` | セルのパディング |
-| `background` | `Color \| (rowIndex: number, columnIndex: number) => Color \| undefined` | セルの背景色 |
-| `textStyle` | `Partial<TextStyle> \| (rowIndex: number, colIndex: number) => Partial<TextStyle>` | セル内テキストのスタイル |
-| `splitable` | `boolean` | ページをまたいで分割可能かどうか |
 
 #### `<Row>`
 
@@ -233,15 +173,6 @@
 | `src` | `string` | 画像ファイルのパス |
 | `style?` | `Partial<ImageStyle>` | 画像スタイル |
 
-`ImageStyle` のフィールド：
-
-| フィールド | 型 | 説明 |
-| --- | --- | --- |
-| `width` | `number \| Ratio` | 幅（mm またはページ幅比） |
-| `height` | `number \| Ratio` | 高さ（mm またはページ高比） |
-| `align` | `Align` | 配置方向 |
-| `page` | `number` | PDF 埋め込み時のページ番号（1-based） |
-
 #### `<Rect>`
 
 矩形．
@@ -270,23 +201,6 @@
 | `semanticType?` | `"image" \| "table" \| "math" \| "code"` | 意味上のブロック種別（ギャップ計算に影響） |
 | `children?` | `BlockChildren` | ブロック要素 |
 
-`BoxStyle` の主なフィールド：
-
-| フィールド | 型 | 説明 |
-| --- | --- | --- |
-| `padding` | `Padding` | パディング（mm） |
-| `margin` | `Margin` | マージン（mm） |
-| `inlineSize` | `number \| Ratio \| Fr` | インライン方向のサイズ |
-| `blockSize` | `number` | ブロック方向のサイズ（mm，固定） |
-| `align` | `Align` | 配置方向（`inlineSize` 指定時のみ有効） |
-| `wrap` | `"start" \| "end"` | テキスト回り込み方向 |
-| `splitable` | `boolean` | 段・ページをまたいで分割可能かどうか |
-| `columns` | `number` | 段数 |
-| `columnGap` | `number` | 段間（mm） |
-| `background` | `Effect[]` | 背景エフェクトのレイヤ |
-| `border` | `Borders` | 枠線 |
-| `borderRadius` | `number` | 角丸の半径（mm） |
-
 ```tsx
 <Box style={{ padding: { top: 5, bottom: 5, left: 10, right: 10 }, background: [{ type: "fill", color: "#f5f5f5" }] }}>
   <P>囲みテキスト</P>
@@ -301,13 +215,6 @@
 | --- | --- | --- |
 | `style?` | `Partial<FlexboxStyle>` | フレックスボックス��タイル |
 | `children?` | `BlockChildren` | `<Box>` 要素 |
-
-`FlexboxStyle` のフィールド：
-
-| フィールド | 型 | 説明 |
-| --- | --- | --- |
-| `gap` | `number` | ボックス間の隙間（mm） |
-| `alignItems` | `"stretch" \| "start"` | ブロック方向の揃え |
 
 ```tsx
 <Flexbox style={{ gap: 5 }}>
