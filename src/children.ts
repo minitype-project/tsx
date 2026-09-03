@@ -15,6 +15,7 @@ import {
   isBlock,
   isBlockExtender,
   isGroup,
+  isInline,
   isTableCell,
 } from "@minitype/minitype";
 import type {
@@ -52,6 +53,22 @@ const isIgnored = (value: unknown): boolean => {
  */
 const isTableCellArray = (value: unknown): value is TableCell[] => {
   return Array.isArray(value) && value.length > 0 && isTableCell(value[0]);
+};
+
+/**
+ * ブロック要素の識別名を返す．`textType`（`"h1"`，`"paragraph"` 等）を `type` より優先する．
+ */
+const blockLabel = (child: unknown): string => {
+  const typed = child as { type?: string; textType?: string };
+  return typed.textType ?? typed.type ?? "block element";
+};
+
+/**
+ * インライン要素の識別名を返す．Command の `name`（`"b"`，`"sup"` 等）を `type` より優先する．
+ */
+const inlineLabel = (child: unknown): string => {
+  const typed = child as { type?: string; name?: string };
+  return typed.name ?? typed.type ?? "inline element";
 };
 
 /**
@@ -96,6 +113,12 @@ export const collectInlineLines = (
         lines.push(parts[i] ? [parts[i]] : []);
       }
       continue;
+    }
+    // ブロック要素はインライン要素として配置できない
+    if (isBlock(child)) {
+      throw new Error(
+        `Invalid JSX structure: "${blockLabel(child)}" cannot be placed in an inline context.`,
+      );
     }
     lines.at(-1)!.push(child as InlineOrExtender);
   }
@@ -145,9 +168,21 @@ export const collectBlocks = (
   const result: (Block | BlockExtender)[] = [];
 
   for (const child of flat) {
+    if (isIgnored(child)) {
+      continue;
+    }
     if (isBlock(child) || isBlockExtender(child as Block | BlockExtender)) {
       result.push(child as Block | BlockExtender);
+      continue;
     }
+    if (isInline(child)) {
+      throw new Error(
+        `Invalid JSX structure: "${inlineLabel(child)}" cannot be placed in a block context.`,
+      );
+    }
+    throw new Error(
+      "Invalid JSX structure: unexpected child in block context.",
+    );
   }
 
   return result;
@@ -177,7 +212,27 @@ export const collectSingleBlock = (children: BlockChildren): Block => {
  */
 export const collectGroups = (children: GroupChildren): Group[] => {
   const flat = flattenJsxChildren(children);
-  return flat.filter(isGroup);
+  const result: Group[] = [];
+
+  for (const child of flat) {
+    if (isIgnored(child)) {
+      continue;
+    }
+    if (isGroup(child)) {
+      result.push(child);
+      continue;
+    }
+    if (isBlock(child)) {
+      throw new Error(
+        `Invalid JSX structure: "${blockLabel(child)}" cannot be placed directly inside Document. Wrap it in a Group.`,
+      );
+    }
+    throw new Error(
+      "Invalid JSX structure: unexpected child in Document. Expected Group elements.",
+    );
+  }
+
+  return result;
 };
 
 /**
@@ -190,15 +245,27 @@ export const collectRows = (children: TableChildren): TableCell[][] => {
     return [children];
   }
   if (!Array.isArray(children)) {
+    if (!isIgnored(children)) {
+      throw new Error(
+        "Invalid JSX structure: unexpected child in Table. Expected Row elements.",
+      );
+    }
     return [];
   }
   // 複数の Row（children が (TableCell[] | unknown)[] の場合）
   const rows: TableCell[][] = [];
   for (const item of children) {
+    if (isIgnored(item)) {
+      continue;
+    }
     if (isTableCellArray(item)) {
       rows.push(item);
     } else if (Array.isArray(item)) {
-      rows.push(...collectRows(item));
+      rows.push(...collectRows(item as TableChildren));
+    } else {
+      throw new Error(
+        "Invalid JSX structure: unexpected child in Table. Expected Row elements.",
+      );
     }
   }
   return rows;
@@ -209,7 +276,22 @@ export const collectRows = (children: TableChildren): TableCell[][] => {
  */
 export const collectCells = (children: RowChildren): TableCell[] => {
   const flat = flattenJsxChildren(children);
-  return flat.filter(isTableCell);
+  const result: TableCell[] = [];
+
+  for (const child of flat) {
+    if (isIgnored(child)) {
+      continue;
+    }
+    if (isTableCell(child)) {
+      result.push(child);
+      continue;
+    }
+    throw new Error(
+      "Invalid JSX structure: unexpected child in Row. Expected Cell elements.",
+    );
+  }
+
+  return result;
 };
 
 /**
@@ -223,6 +305,9 @@ export const collectBoxes = (
   const result: (Block | BlockExtender)[] = [];
 
   for (const child of flat) {
+    if (isIgnored(child)) {
+      continue;
+    }
     const typed = child as { type?: unknown };
     if (
       typeof typed === "object" &&
@@ -230,7 +315,16 @@ export const collectBoxes = (
       (typed.type === "box" || typed.type === "blockExtender")
     ) {
       result.push(child as Block | BlockExtender);
+      continue;
     }
+    if (isBlock(child)) {
+      throw new Error(
+        `Invalid JSX structure: "${blockLabel(child)}" cannot be placed directly inside Flexbox. Only Box elements are allowed.`,
+      );
+    }
+    throw new Error(
+      "Invalid JSX structure: unexpected child in Flexbox. Expected Box elements.",
+    );
   }
 
   return result;

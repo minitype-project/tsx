@@ -7,6 +7,7 @@
 import type {
   Block,
   BlockExtender,
+  DocumentStyle,
   Group,
   InlineOrExtender,
   TableCell,
@@ -23,9 +24,21 @@ import type {
 export type LineBreak = { readonly type: "br" };
 
 /**
+ * {@link Document} コンポーネントの戻り値型．
+ * minitype() に渡す Group[] と {@link DocumentStyle} を格納する．
+ */
+export interface DocumentResult {
+  /** ページグループの配列．*/
+  groups: Group[];
+  /** ドキュメントスタイル．*/
+  style?: Partial<DocumentStyle>;
+}
+
+/**
  * JSX 式が評価される型．
  */
 export type JsxElement =
+  | DocumentResult
   | Block
   | InlineOrExtender
   | LineBreak
@@ -46,25 +59,30 @@ type Falsy = boolean | null | undefined;
  * グループの children 型．
  * `<Document>` に使用する．
  */
-export type GroupChildren = Group | GroupChildren[] | Falsy;
+export type GroupChildren = Group | GroupChildren[] | JsxElement | Falsy;
 
 /**
  * ブロック要素の children 型．
  * `<Box>`，`<Group>` 等，ブロック要素を受け取るコンポーネントに使用する．
  */
-export type BlockChildren = Block | BlockExtender | BlockChildren[] | Falsy;
+export type BlockChildren =
+  | Block
+  | BlockExtender
+  | BlockChildren[]
+  | JsxElement
+  | Falsy;
 
 /**
  * テーブルの children 型（Row = `TableCell[]` の配列）．
  * `<Table>` に使用する．
  */
-export type TableChildren = TableCell[] | TableChildren[] | Falsy;
+export type TableChildren = TableCell[] | TableChildren[] | JsxElement | Falsy;
 
 /**
  * 行の children 型（Cell = `TableCell` の配列）．
  * `<Row>` に使用する．
  */
-export type RowChildren = TableCell | RowChildren[] | Falsy;
+export type RowChildren = TableCell | RowChildren[] | JsxElement | Falsy;
 
 /**
  * インライン要素の children 型．
@@ -74,6 +92,7 @@ export type InlineChildren =
   | InlineOrExtender
   | LineBreak
   | InlineChildren[]
+  | JsxElement
   | string
   | number
   | Falsy;
@@ -108,9 +127,22 @@ export namespace JSX {
 export const Fragment = Symbol.for("minitype.Fragment");
 
 /**
+ * コンポーネント関数の戻り値型 `T` を保持するオーバーロードを持つ JSX ファクトリ型．
+ * これにより，各 JSX 式がコンポーネントの実際の戻り値型として推論される．
+ */
+type JsxFactory = {
+  <T extends JsxElement>(
+    type: (props: Record<string, unknown>) => T,
+    props: Record<string, unknown>,
+    _key?: string,
+  ): T;
+  (type: symbol, props: Record<string, unknown>, _key?: string): JsxElement;
+};
+
+/**
  * JSX ファクトリ関数（automatic transform 用）．
  */
-export const jsx = (
+export const jsx: JsxFactory = (
   type: ((props: Record<string, unknown>) => JsxElement) | symbol,
   props: Record<string, unknown>,
   _key?: string,

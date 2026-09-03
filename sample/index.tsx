@@ -6,6 +6,7 @@ import {
   Code,
   Color,
   Document,
+  type DocumentResult,
   Fn,
   Footnote,
   Group,

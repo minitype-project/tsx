@@ -5,24 +5,18 @@
  */
 
 import type {
-  DocumentStyle,
   GroupLabelOptions,
   GroupStyle,
   Group as MinitypeGroup,
 } from "@minitype/minitype";
 import { collectBlocks, collectGroups } from "./children.js";
-import type { BlockChildren, GroupChildren } from "./jsx-runtime.js";
+import type {
+  BlockChildren,
+  DocumentResult,
+  GroupChildren,
+} from "./jsx-runtime.js";
 
-/**
- * {@link Document} の戻り値型．
- * minitype() に渡す Group[] と {@link DocumentStyle} を格納する．
- */
-export interface DocumentResult {
-  /** ページグループの配列．*/
-  groups: MinitypeGroup[];
-  /** ドキュメントスタイル．*/
-  style?: DocumentStyle;
-}
+export type { DocumentResult } from "./jsx-runtime.js";
 
 /**
  * {@link Document} コンポーネントの Props．
@@ -31,7 +25,7 @@ export interface DocumentProps {
   /** 子要素（グループ）．*/
   children?: GroupChildren;
   /** ドキュメントスタイル．*/
-  style?: DocumentStyle;
+  style?: DocumentResult["style"];
 }
 
 /**
