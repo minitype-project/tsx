@@ -38,11 +38,23 @@ interface InterfaceInfo {
   props: PropInfo[];
   /** `extends` 句に含まれる親インターフェース名の一覧． */
   extendsNames: string[];
+  /**
+   * `export type XProps = Y` 形式のエイリアスの場合，エイリアス先の型名．
+   * エイリアスでない場合は `undefined`．
+   */
+  aliasTarget?: string;
 }
+
+/**
+ * 型名をキー，プロパティ一覧を値とするレジストリ．
+ * エイリアス解決のために `src/components/` 外のソースも含む．
+ */
+type TypeRegistry = Map<string, PropInfo[]>;
 
 // ------
 // JSDoc パース
 // ------
+
 /**
  * JSDoc コメント文字列を説明文と `@default` 値に分解する．
  * 複数行の説明は結合して返す．`@default` 以外のタグは無視する．
@@ -51,7 +63,7 @@ interface InterfaceInfo {
 const parseJSDoc = (
   text: string,
 ): { description: string; defaultValue?: string } => {
-  // `/**` と `*/` を除去して各行を正規る
+  // `/**` と `*/` を除去して各行を正規化
   const inner = text.replace(/^\/\*\*/, "").replace(/\*\/$/, "");
   const lines = inner
     .split("\n")
@@ -80,9 +92,77 @@ const parseJSDoc = (
 // ------
 // TypeScript ソースパース（テキストベース）
 // ------
+
+/**
+ * プロパティブロック（`{` の直後から `}` の直前まで）を解析する．
+ * `parseSourceFile` と `buildTypeRegistry` で共通利用する．
+ * @param lines ソース行の配列．
+ * @param startIndex 開始行インデックス（`{` の次の行）．
+ * @returns `{ props, endIndex }` — `endIndex` は閉じ括弧 `}` または `};` の行インデックス．
+ */
+const parsePropBlock = (
+  lines: string[],
+  startIndex: number,
+): { props: PropInfo[]; endIndex: number } => {
+  const props: PropInfo[] = [];
+  let pendingJSDoc: string | null = null;
+  let i = startIndex;
+
+  while (i < lines.length) {
+    const trimmed = lines[i].trim();
+
+    if (trimmed === "}" || trimmed === "};") {
+      break;
+    }
+
+    // JSDoc の収集：単行（`/** ... */`）と複数行の両方に対応
+    if (trimmed.startsWith("/**")) {
+      if (trimmed.endsWith("*/")) {
+        pendingJSDoc = trimmed;
+        i++;
+      } else {
+        const jsDocLines = [trimmed];
+        i++;
+        while (i < lines.length && !lines[i].trim().endsWith("*/")) {
+          jsDocLines.push(lines[i].trim());
+          i++;
+        }
+        jsDocLines.push(lines[i].trim());
+        pendingJSDoc = jsDocLines.join("\n");
+        i++;
+      }
+      continue;
+    }
+
+    // プロパティ宣言のパース．
+    // `name?: Type;` 形式にマッチする．
+    // メソッドシグネチャ（`name(args): Type`）やインデックスシグネチャ（`[key: string]: Type`）はマッチしないため自動的に除外される．
+    const propMatch = trimmed.match(/^(\w+)(\?)?\s*:\s*(.+)$/);
+    if (propMatch) {
+      const name = propMatch[1];
+      const optional = propMatch[2] === "?";
+      // 末尾のセミコロンを除去
+      const typeText = propMatch[3].trim().replace(/;$/, "").trim();
+      const { description, defaultValue } = pendingJSDoc
+        ? parseJSDoc(pendingJSDoc)
+        : { description: "", defaultValue: undefined };
+      props.push({ name, optional, typeText, description, defaultValue });
+      pendingJSDoc = null;
+    } else if (trimmed !== "" && !trimmed.startsWith("//")) {
+      // パース対象外の行（`readonly` 修飾子など）が来たら JSDoc をリセット
+      pendingJSDoc = null;
+    }
+
+    i++;
+  }
+
+  return { props, endIndex: i };
+};
+
 /**
  * TypeScript ソースファイルから `*Props` インターフェースを解析する．
  * 継承元のフィールドは含めず，当該インターフェースで直接宣言されたフィールドのみを返す．
+ * `export type XProps = Y;` 形式のエイリアスも検出し，`aliasTarget` として記録する．
  * @param source ソースファイルのテキスト．
  * @returns コンポーネント名（`Props` を除いた名前）をキーとする `InterfaceInfo` のマップ．
  */
@@ -96,91 +176,117 @@ const parseSourceFile = (source: string): Map<string, InterfaceInfo> => {
     const ifaceMatch = lines[i].match(
       /^export\s+interface\s+(\w+Props)\b(.*)\{/,
     );
-    if (!ifaceMatch) {
+    if (ifaceMatch) {
+      // `FigureProps` → `Figure` のようにコンポーネント名を取り出す
+      const componentName = ifaceMatch[1].slice(0, -"Props".length);
+
+      // `extends Foo, Bar<Baz>` のような extends 句から親名を抽出する．
+      // ジェネリクス（`<...>`）は除去して名前だけ残す．
+      const extendsMatch = ifaceMatch[2].match(/extends\s+([\w,\s<>]+)/);
+      const extendsNames = extendsMatch
+        ? extendsMatch[1].split(",").map((s) => s.trim().replace(/<.*$/, ""))
+        : [];
+
+      i++;
+      const { props, endIndex } = parsePropBlock(lines, i);
+      result.set(componentName, { props, extendsNames });
+      i = endIndex + 1;
+      continue;
+    }
+
+    // `export type XProps = Y;` 形式のエイリアスを検索
+    const typeAliasMatch = lines[i].match(
+      /^export\s+type\s+(\w+Props)\s*=\s*(\w+)\s*;/,
+    );
+    if (typeAliasMatch) {
+      const componentName = typeAliasMatch[1].slice(0, -"Props".length);
+      const aliasTarget = typeAliasMatch[2];
+      result.set(componentName, { props: [], extendsNames: [], aliasTarget });
       i++;
       continue;
     }
 
-    // `FigureProps` → `Figure` のようにコンポーネント名を取り出す
-    const componentName = ifaceMatch[1].slice(0, -"Props".length);
-
-    // `extends Foo, Bar<Baz>` のような extends 句から親名を抽出する．
-    // ジェネリクス（`<...>`）は除去して名前だけ残す．
-    const extendsMatch = ifaceMatch[2].match(/extends\s+([\w,\s<>]+)/);
-    const extendsNames = extendsMatch
-      ? extendsMatch[1].split(",").map((s) => s.trim().replace(/<.*$/, ""))
-      : [];
-
     i++;
-
-    const props: PropInfo[] = [];
-    // 直前の JSDoc ブロックを一時保存する変数
-    let pendingJSDoc: string | null = null;
-
-    // 閉じ括弧 `}` まで 1 行ずつパース
-    while (i < lines.length) {
-      const trimmed = lines[i].trim();
-
-      if (trimmed === "}" || trimmed === "};") {
-        break;
-      }
-
-      // JSDoc の収集：単行（`/** ... */`）と複数行の両方に対応
-      if (trimmed.startsWith("/**")) {
-        if (trimmed.endsWith("*/")) {
-          // 単行 JSDoc
-          pendingJSDoc = trimmed;
-          i++;
-        } else {
-          // 複数行 JSDoc：`*/` で終わる行まで収集
-          const jsDocLines = [trimmed];
-          i++;
-          while (i < lines.length && !lines[i].trim().endsWith("*/")) {
-            jsDocLines.push(lines[i].trim());
-            i++;
-          }
-          jsDocLines.push(lines[i].trim()); // 閉じる `*/` の行
-          pendingJSDoc = jsDocLines.join("\n");
-          i++;
-        }
-        continue;
-      }
-
-      // プロパティ宣言のパース．
-      // `name?: Type;` 形式にマッチする．
-      // メソッドシグネチャ（`name(args): Type`）やインデックスシグネチャ（`[key: string]: Type`）はマッチしないため自動的に除外される．
-      const propMatch = trimmed.match(/^(\w+)(\?)?\s*:\s*(.+)$/);
-      if (propMatch) {
-        const name = propMatch[1];
-        const optional = propMatch[2] === "?";
-        // 末尾のセミコロンを除去
-        const typeText = propMatch[3].trim().replace(/;$/, "").trim();
-        const { description, defaultValue } = pendingJSDoc
-          ? parseJSDoc(pendingJSDoc)
-          : { description: "", defaultValue: undefined };
-        props.push({ name, optional, typeText, description, defaultValue });
-        pendingJSDoc = null;
-      } else if (trimmed !== "" && !trimmed.startsWith("//")) {
-        // パース対象外の行（`readonly` 修飾子など）が来たら JSDoc をリセット
-        pendingJSDoc = null;
-      }
-
-      i++;
-    }
-
-    result.set(componentName, { props, extendsNames });
-    i++; // 閉じ括弧 `}` をスキップ
   }
 
   return result;
 };
 
 /**
- * `src/components/` 配下のすべての `.ts` ファイルから `*Props` インターフェースを収集する．
- * @param srcDir コンポーネントソースのディレクトリパス．
+ * ディレクトリ内の TypeScript ソースファイルを再帰的に列挙する．
+ * テストファイル（`.test.ts`）と型定義ファイル（`.d.ts`）は除外する．
+ * @param dir 検索対象のディレクトリパス．
  */
-const parseInterfaces = (srcDir: string): Map<string, InterfaceInfo> => {
-  const result = new Map<string, InterfaceInfo>();
+const listTsFiles = (dir: string): string[] => {
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  return entries.flatMap((entry) => {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      return listTsFiles(fullPath);
+    }
+    if (
+      entry.name.endsWith(".ts") &&
+      !entry.name.endsWith(".test.ts") &&
+      !entry.name.endsWith(".d.ts")
+    ) {
+      return [fullPath];
+    }
+    return [];
+  });
+};
+
+/**
+ * 複数のディレクトリから TypeScript ソースを読み込み，型レジストリを構築する．
+ * `export interface X { ... }` と `export type X = { ... }` の両形式に対応する．
+ * エイリアス先の解決など，内部参照用に使用する．
+ * @param srcDirs 検索対象のディレクトリパスの一覧．
+ */
+const buildTypeRegistry = (srcDirs: string[]): TypeRegistry => {
+  const registry: TypeRegistry = new Map();
+
+  for (const dir of srcDirs) {
+    for (const filePath of listTsFiles(dir)) {
+      const source = fs.readFileSync(filePath, "utf-8");
+      const lines = source.split("\n");
+      let i = 0;
+
+      while (i < lines.length) {
+        // `export interface TypeName {` または `export type TypeName = {`
+        const ifaceMatch = lines[i].match(/^export\s+interface\s+(\w+)\b.*\{/);
+        const typeObjMatch = lines[i].match(/^export\s+type\s+(\w+)\s*=\s*\{/);
+        const match = ifaceMatch ?? typeObjMatch;
+
+        if (match) {
+          const typeName = match[1];
+          i++;
+          const { props, endIndex } = parsePropBlock(lines, i);
+          registry.set(typeName, props);
+          i = endIndex + 1;
+          continue;
+        }
+
+        i++;
+      }
+    }
+  }
+
+  return registry;
+};
+
+/**
+ * `src/components/` 配下のすべての `.ts` ファイルから `*Props` インターフェースを収集する．
+ * 追加のディレクトリからも型レジストリを構築し，エイリアスを解決する．
+ * @param srcDir コンポーネントソースのディレクトリパス．
+ * @param extraTypeDirs エイリアス解決のために参照する追加ディレクトリ（例：`../minitype/src`）．
+ */
+const parseInterfaces = (
+  srcDir: string,
+  extraTypeDirs: string[],
+): { interfaces: Map<string, InterfaceInfo>; typeRegistry: TypeRegistry } => {
+  const interfaces = new Map<string, InterfaceInfo>();
 
   const files = fs
     .readdirSync(srcDir)
@@ -190,29 +296,48 @@ const parseInterfaces = (srcDir: string): Map<string, InterfaceInfo> => {
   for (const filePath of files) {
     const source = fs.readFileSync(filePath, "utf-8");
     for (const [name, info] of parseSourceFile(source)) {
-      result.set(name, info);
+      interfaces.set(name, info);
     }
   }
 
-  return result;
+  // コンポーネントソース + 追加ディレクトリからレジストリを構築
+  const typeRegistry = buildTypeRegistry([srcDir, ...extraTypeDirs]);
+
+  // `export type XProps = Y` 形式のエイリアスを解決する
+  for (const [, info] of interfaces) {
+    if (info.aliasTarget !== undefined) {
+      const targetProps = typeRegistry.get(info.aliasTarget);
+      if (targetProps !== undefined) {
+        info.props = targetProps;
+      }
+    }
+  }
+
+  return { interfaces, typeRegistry };
 };
 
 /**
- * `extends` 句にプロジェクト外の型（`*Props` ではない，またはマップに存在しない）が含まれているかを判定する．
+ * `extends` 句にプロジェクト外の型が含まれているかを判定する．
  * 外部型を継承している場合，継承フィールドをスクリプトで把握できないためテーブル自動生成をスキップする．
+ * エイリアス（`aliasTarget`）の場合は型レジストリで解決可能かどうかで判定する．
  * @param info 判定対象のインターフェース情報．
  * @param allInterfaces 全インターフェースのマップ（親の存在確認に使用）．
+ * @param typeRegistry 型レジストリ（エイリアス解決の確認に使用）．
  */
 const hasExternalExtends = (
   info: InterfaceInfo,
   allInterfaces: Map<string, InterfaceInfo>,
+  typeRegistry: TypeRegistry,
 ): boolean => {
+  // エイリアスの場合：レジストリに存在しなければ外部型とみなす
+  if (info.aliasTarget !== undefined) {
+    return !typeRegistry.has(info.aliasTarget);
+  }
+  // 通常の extends の場合：`*Props` 以外または未知の型は外部型とみなす
   return info.extendsNames.some((parent) => {
-    // `*Props` で終わらない名前は外部型とみなす（例：`BackgroundImageOptions`）
     if (!parent.endsWith("Props")) {
       return true;
     }
-    // `*Props` であっても，マップに存在しなければ外部型とみなす
     const parentComponent = parent.slice(0, -"Props".length);
     return !allInterfaces.has(parentComponent);
   });
@@ -244,6 +369,7 @@ const generateTable = (props: PropInfo[]): string => {
 // ------
 // markdown ファイル更新
 // ------
+
 /**
  * 見出し行からコンポーネント名を抽出する．
  * `` ### `<Figure>` `` のようにコンポーネントが 1 つのみ記載された見出しを対象とし，
@@ -257,17 +383,18 @@ const extractComponentName = (line: string): string | null => {
 
 /**
  * markdown ファイルの Props テーブルを TSDoc から生成したテーブルに置き換える．
- * 以下の条件に当てはまるコンポーネントの見出し直後のテーブルのみを更新する：
- * - 対応する `*Props` インターフェースがマップに存在する
- * - `extends` 句に外部型を含まない
- * - Props が 1 件以上ある
+ * 以下の方法で Props インターフェースを特定する：
+ * - 単一コンポーネント見出し（`` ### `<Figure>` ``）：見出し名から自動判定
+ * - `<!-- Props: HeadingProps -->` アノテーション：指定されたインターフェースを使用
  * @param mdPath 更新対象の markdown ファイルパス．
  * @param interfaces 全インターフェースのマップ．
+ * @param typeRegistry 型レジストリ（外部型判定に使用）．
  * @returns ファイルが更新された場合は `true`．
  */
 const updateMarkdown = (
   mdPath: string,
   interfaces: Map<string, InterfaceInfo>,
+  typeRegistry: TypeRegistry,
 ): boolean => {
   const content = fs.readFileSync(mdPath, "utf-8");
   const lines = content.split("\n");
@@ -277,45 +404,69 @@ const updateMarkdown = (
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
-    const componentName = extractComponentName(line);
-    const info = componentName ? interfaces.get(componentName) : undefined;
 
-    // 外部型を継承するインターフェースは手動管理のためスキップ
-    const props =
-      info && !hasExternalExtends(info, interfaces) ? info.props : undefined;
-
-    if (props !== undefined && props.length > 0) {
+    // 見出し行でなければそのまま出力
+    if (!line.match(/^#{2,6}\s/)) {
       result.push(line);
       i++;
+      continue;
+    }
 
-      // 見出しの直後からテーブル（`|` で始まる行）または次の見出しが来るまで，説明文などの非テーブル行をそのまま収集
-      const before: string[] = [];
-      while (
-        i < lines.length &&
-        !lines[i].startsWith("|") &&
-        !lines[i].match(/^#{2,6}\s/)
-      ) {
-        before.push(lines[i]);
+    // 見出し行：単一コンポーネントなら名前から Props を特定
+    const componentName = extractComponentName(line);
+    let info = componentName ? interfaces.get(componentName) : undefined;
+
+    result.push(line);
+    i++;
+
+    // 見出しとテーブル（または次の見出し）の間の行を収集する．
+    // `<!-- Props: InterfaceName -->` アノテーションも検出する．
+    const before: string[] = [];
+    while (
+      i < lines.length &&
+      !lines[i].startsWith("|") &&
+      !lines[i].match(/^#{2,6}\s/)
+    ) {
+      if (info === undefined) {
+        const annotationMatch = lines[i].match(
+          /^<!--\s*Props:\s*(\w+Props)\s*-->/,
+        );
+        if (annotationMatch) {
+          const annotatedComponent = annotationMatch[1].slice(
+            0,
+            -"Props".length,
+          );
+          info = interfaces.get(annotatedComponent);
+        }
+      }
+      before.push(lines[i]);
+      i++;
+    }
+
+    const props =
+      info && !hasExternalExtends(info, interfaces, typeRegistry)
+        ? info.props
+        : undefined;
+
+    result.push(...before);
+
+    if (
+      props !== undefined &&
+      props.length > 0 &&
+      i < lines.length &&
+      lines[i].startsWith("|")
+    ) {
+      // 既存テーブルの行をすべて読み飛ばして生成テーブルに置換
+      const oldLines: string[] = [];
+      while (i < lines.length && lines[i].startsWith("|")) {
+        oldLines.push(lines[i]);
         i++;
       }
-      result.push(...before);
-
-      if (i < lines.length && lines[i].startsWith("|")) {
-        // 既存テーブルの行をすべて読み飛ばして生成テーブルに置換
-        const oldLines: string[] = [];
-        while (i < lines.length && lines[i].startsWith("|")) {
-          oldLines.push(lines[i]);
-          i++;
-        }
-        const newTable = generateTable(props);
-        result.push(newTable);
-        if (oldLines.join("\n") !== newTable) {
-          changed = true;
-        }
+      const newTable = generateTable(props);
+      result.push(newTable);
+      if (oldLines.join("\n") !== newTable) {
+        changed = true;
       }
-    } else {
-      result.push(line);
-      i++;
     }
   }
 
@@ -333,11 +484,14 @@ const updateMarkdown = (
 const main = () => {
   const srcDir = path.join(ROOT, "src/components");
   const docsDir = path.join(ROOT, "docs/components");
+  const minitypeSrcDir = path.join(ROOT, "../minitype/src");
 
   console.log("Parsing TypeScript interfaces...");
-  const interfaces = parseInterfaces(srcDir);
+  const { interfaces, typeRegistry } = parseInterfaces(srcDir, [
+    minitypeSrcDir,
+  ]);
   const autoGenCount = [...interfaces.values()].filter(
-    (info) => !hasExternalExtends(info, interfaces),
+    (info) => !hasExternalExtends(info, interfaces, typeRegistry),
   ).length;
   console.log(
     `Found ${interfaces.size} Props interfaces (${autoGenCount} auto-generated, ${interfaces.size - autoGenCount} skipped due to external extends).`,
@@ -350,7 +504,7 @@ const main = () => {
 
   let updatedCount = 0;
   for (const mdFile of mdFiles) {
-    const updated = updateMarkdown(mdFile, interfaces);
+    const updated = updateMarkdown(mdFile, interfaces, typeRegistry);
     const label = path.basename(mdFile);
     if (updated) {
       console.log(`Updated: ${label}`);

@@ -56,8 +56,8 @@
     "sample": "cd sample && tsx index.tsx",
     "docs": "tsx scripts/gen-docs.ts"
   },
-  "peerDependencies": {
-    "@minitype/minitype": ">=0.1.0"
+  "dependencies": {
+    "@minitype/minitype": "^0.1.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.4",

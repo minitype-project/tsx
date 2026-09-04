@@ -327,5 +327,3 @@ Props なし（`label`，`id` も持たない）．
 | `types?` | `ResetLabelType[]` | リセットするカウンタの種類．省略時はすべてリセットする． |
 
 `ResetLabelType` の値：`"h1"`，`"h2"`，`"h3"`，`"h4"`，`"image"`，`"table"`，`"math"`，`"caption"`，`"footnote"`
-
----
