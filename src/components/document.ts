@@ -25,9 +25,9 @@ export type { DocumentResult } from "../jsx-runtime.js";
  * {@link Document} コンポーネントの Props．
  */
 export interface DocumentProps {
-  /** 子要素（グループ）．*/
+  /** 子要素（グループ）． */
   children?: GroupChildren;
-  /** ドキュメントスタイル．*/
+  /** ドキュメントスタイル． */
   style?: DocumentResult["style"];
 }
 
@@ -48,13 +48,13 @@ export const Document = ({
  * {@link Group} コンポーネントの Props．
  */
 export interface GroupProps {
-  /** 子要素（ブロック，フロー）．*/
+  /** 子要素（ブロックまたはフロー）． */
   children?: BodyChildren;
-  /** グループスタイル．*/
+  /** グループスタイル． */
   style?: GroupStyle;
-  /** 開始ページ番号．*/
+  /** 開始ページ番号． */
   pageIndex?: number;
-  /** ラベルオプション．*/
+  /** ラベルオプション． */
   labelOptions?: GroupLabelOptions;
 }
 
@@ -79,7 +79,7 @@ export const Group = ({
  * {@link Flow} コンポーネントの Props．
  */
 export interface FlowProps {
-  /** 子要素（ブロック）．*/
+  /** 子要素（ブロック）． */
   children?: BlockChildren;
   /**
    * フローの基準位置．
@@ -88,17 +88,17 @@ export interface FlowProps {
    * - `"page"`：ページ左上
    */
   position: minitype.Flow["position"];
-  /** インライン方向のオフセット（mm）．*/
+  /** インライン方向のオフセット（mm）． */
   inlineOffset?: number;
-  /** ブロック方向のオフセット（mm）．*/
+  /** ブロック方向のオフセット（mm）． */
   blockOffset?: number;
-  /** インライン方向のサイズ（mm）．*/
+  /** インライン方向のサイズ（mm）． */
   inlineSize?: number;
-  /** 表示するページ（ページ番号またはフィルタ関数）．*/
+  /** 表示するページ（ページ番号またはフィルタ関数）． */
   page?: number | PageFilter;
-  /** 書字方向．*/
+  /** 書字方向． */
   writingMode?: WritingMode;
-  /** 重ね順序．*/
+  /** 重ね順序． */
   zIndex?: number;
 }
 

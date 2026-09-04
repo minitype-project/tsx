@@ -26,7 +26,7 @@ export const Fbr = (): minitype.ForceBreak => {
  * {@link Kern} コンポーネントの Props．
  */
 export interface KernProps {
-  /** カーニング量（em 単位）．*/
+  /** カーニング量（em 単位）． */
   em: number;
 }
 
@@ -55,7 +55,7 @@ export const NoSplit = (): minitype.NoSplit => {
  * {@link Cid} コンポーネントの Props．
  */
 export interface CidProps {
-  /** CID 番号．*/
+  /** CID 番号． */
   cid: number;
 }
 
@@ -70,7 +70,7 @@ export const Cid = ({ cid }: CidProps): minitype.Cid => {
  * {@link Fn} コンポーネントの Props．
  */
 export interface FnProps {
-  /** 参照する脚注のラベル（{@link Footnote} の `label` と対応）．*/
+  /** 参照する脚注のラベル（{@link Footnote} の `label` と対応）． */
   label: string;
 }
 

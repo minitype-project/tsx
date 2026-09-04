@@ -29,7 +29,7 @@ type InlineSegments =
  * インラインラップ系コンポーネント（{@link B}，{@link U} 等）の共通 Props．
  */
 export interface InlineWrapProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
 }
 
@@ -77,9 +77,9 @@ export const Del = makeInlineCommand("del");
  * {@link Color} コンポーネントの Props．
  */
 export interface ColorProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
-  /** 文字色．*/
+  /** 文字色． */
   value: MinitypeColor;
 }
 
@@ -98,9 +98,9 @@ export const Color = ({ children, value }: ColorProps): InlineSegments => {
  * {@link FontSize} コンポーネントの Props．
  */
 export interface FontSizeProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
-  /** 文字サイズ（mm）．*/
+  /** 文字サイズ（mm）． */
   size: number;
 }
 
@@ -119,9 +119,9 @@ export const FontSize = ({ children, size }: FontSizeProps): InlineSegments => {
  * {@link Scale} コンポーネントの Props．
  */
 export interface ScaleProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
-  /** スケール（em 単位）．*/
+  /** スケール（em 単位）． */
   factor: Em;
 }
 
@@ -140,9 +140,9 @@ export const Scale = ({ children, factor }: ScaleProps): InlineSegments => {
  * {@link Overline} コンポーネントの Props．
  */
 export interface OverlineProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
-  /** 上線のスタイル．*/
+  /** 上線のスタイル． */
   line: Line;
 }
 
@@ -161,9 +161,9 @@ export const Overline = ({ children, line }: OverlineProps): InlineSegments => {
  * {@link Ruby} コンポーネントの Props．
  */
 export interface RubyProps {
-  /** ルビ文字．*/
+  /** ルビ文字． */
   ruby: string;
-  /** 親文字．*/
+  /** 親文字． */
   children: string;
 }
 
@@ -186,9 +186,9 @@ export const Ruby = ({
  * {@link Url} コンポーネントの Props．
  */
 export interface UrlProps {
-  /** リンク先の URL．*/
+  /** リンク先の URL． */
   href: string;
-  /** 表示されるテキスト（省略時は URL を表示）．*/
+  /** 表示されるテキスト（省略時は URL を表示）． */
   children?: InlineChildren;
 }
 
@@ -207,17 +207,17 @@ export const Url = ({ href, children }: UrlProps): InlineSegments => {
  * {@link Command} コンポーネントの Props．
  */
 export interface CommandProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
-  /** コマンド名（`DocumentStyle.command` のキー）．*/
+  /** コマンド名（`DocumentStyle.command` のキー）． */
   name?: string;
-  /** コマンドスタイル．*/
+  /** コマンドスタイル． */
   style?: Partial<CommandStyle>;
-  /** ラベル．*/
+  /** ラベル． */
   label?: string;
-  /** ID．*/
+  /** ID． */
   id?: string;
-  /** リンク．*/
+  /** リンク． */
   link?: Link;
 }
 
@@ -254,13 +254,13 @@ export const Command = ({
  * {@link InlineGraphic} コンポーネントの Props．
  */
 export interface InlineGraphicProps {
-  /** 画像ファイルのパス．*/
+  /** 画像ファイルのパス． */
   src: string;
-  /** 画像サイズ．*/
+  /** 画像サイズ． */
   size?: number | Em;
-  /** ブロック方向のオフセット．*/
+  /** ブロック方向のオフセット． */
   blockOffset?: number | Em;
-  /** PDF 埋め込み時のページ番号（1-based）．*/
+  /** PDF 埋め込み時のページ番号（1-based）． */
   page?: number;
 }
 
@@ -286,9 +286,9 @@ export const InlineGraphic = ({
  * {@link InlineMath} コンポーネントの Props．
  */
 export interface InlineMathProps {
-  /** 子要素（LaTeX 文字列）．*/
+  /** 子要素（LaTeX 文字列）． */
   children?: InlineChildren;
-  /** 文字サイズ．*/
+  /** 文字サイズ． */
   size?: number | Em;
 }
 
@@ -314,9 +314,9 @@ export const InlineMath = ({
  * {@link Hbox} の共通 Props．
  */
 interface HboxBaseProps {
-  /** ボックス幅．*/
+  /** ボックス幅． */
   width: HboxWidth;
-  /** 水平配置．*/
+  /** 水平配置． */
   align?: "left" | "center" | "right" | "justify";
 }
 
@@ -324,7 +324,7 @@ interface HboxBaseProps {
  * インライン要素を内包する {@link Hbox} の Props．
  */
 export interface HboxBodyProps extends HboxBaseProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
   fill?: never;
 }
@@ -333,7 +333,7 @@ export interface HboxBodyProps extends HboxBaseProps {
  * 指定文字で幅を埋める {@link Hbox} の Props．
  */
 export interface HboxFillProps extends HboxBaseProps {
-  /** 塗りつぶし文字．*/
+  /** 塗りつぶし文字． */
   fill: string;
   children?: never;
 }

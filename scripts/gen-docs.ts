@@ -14,25 +14,29 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, "..");
 
-/** インターフェースの 1 プロパティの情報．*/
+/**
+ * インターフェースの 1 プロパティの情報．
+ */
 interface PropInfo {
-  /** プロパティ名．*/
+  /** プロパティ名． */
   name: string;
-  /** `?` が付いているかどうか．*/
+  /** `?` が付いているかどうか． */
   optional: boolean;
-  /** ソースに記述された型テキスト（型解決なし）．*/
+  /** ソースに記述された型テキスト（型解決なし）． */
   typeText: string;
-  /** JSDoc の説明文．*/
+  /** JSDoc の説明文． */
   description: string;
-  /** `@default` タグの値．存在しない場合は `undefined`．*/
+  /** `@default` タグの値．存在しない場合は `undefined`． */
   defaultValue?: string;
 }
 
-/** `*Props` インターフェースの解析結果．*/
+/**
+ * `*Props` インターフェースの解析結果．
+ */
 interface InterfaceInfo {
-  /** 直接宣言されたプロパティの一覧（継承元は含まない）．*/
+  /** 直接宣言されたプロパティの一覧（継承元は含まない）． */
   props: PropInfo[];
-  /** `extends` 句に含まれる親インターフェース名の一覧．*/
+  /** `extends` 句に含まれる親インターフェース名の一覧． */
   extendsNames: string[];
 }
 
@@ -65,7 +69,12 @@ const parseJSDoc = (
     }
   }
 
-  return { description: descLines.join(""), defaultValue };
+  const description = descLines
+    .reduce((acc, line) => {
+      return line.startsWith("- ") ? `${acc}<br>${line}` : acc + line;
+    }, "")
+    .replace(/\{@link\s+([^}]+)\}/g, (_, name: string) => `\`${name.trim()}\``);
+  return { description, defaultValue };
 };
 
 // ------
@@ -223,7 +232,7 @@ const generateTable = (props: PropInfo[]): string => {
     // union 型の `|` は GFM テーブル内でセル区切りと衝突するためエスケープ
     const typeCell = `\`${prop.typeText.replace(/\|/g, "\\|")}\``;
     // 末尾の句点を除去してからデフォルト値を付加
-    let desc = prop.description.trim().replace(/．$/, "");
+    let desc = prop.description.trim();
     if (prop.defaultValue !== undefined) {
       desc += `（デフォルト：\`${prop.defaultValue}\`）`;
     }

@@ -9,8 +9,8 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `style?` | `Partial<DocumentStyle>` | ドキュメント全体のスタイル |
-| `children?` | `GroupChildren` | `<Group>` 要素 |
+| `children?` | `GroupChildren` | 子要素（グループ）． |
+| `style?` | `DocumentResult["style"]` | ドキュメントスタイル． |
 
 ```tsx
 <Document
@@ -35,10 +35,10 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `style?` | `Partial<GroupStyle>` | グループ固有のスタイル（`DocumentStyle` から `size` を除いたもの） |
-| `pageIndex?` | `number` | グループ開始ページ番号（省略時はドキュメントの通し番号） |
-| `labelOptions?` | `GroupLabelOptions` | ラベル関連の設定 |
-| `children?` | `BodyChildren` | ブロック要素，`<Flow>` 要素 |
+| `children?` | `BodyChildren` | 子要素（ブロックまたはフロー）． |
+| `style?` | `GroupStyle` | グループスタイル． |
+| `pageIndex?` | `number` | 開始ページ番号． |
+| `labelOptions?` | `GroupLabelOptions` | ラベルオプション． |
 
 ### `<Flow>`
 
@@ -47,14 +47,14 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `position` | `"pillar" \| "nombre" \| "page"` | 基準位置（版面上端 / 版面下端 / ページ左上） |
-| `inlineOffset?` | `number` | インライン方向のオフセット（mm） |
-| `blockOffset?` | `number` | ブロック方向のオフセット（mm） |
-| `inlineSize?` | `number` | インライン方向のサイズ（mm） |
-| `page?` | `number \| PageFilter` | 表示するページ（ページ番号またはフィルタ関数） |
-| `writingMode?` | `WritingMode` | 書字方向 |
-| `zIndex?` | `number` | 重ね順序 |
-| `children?` | `BlockChildren` | ブロック要素 |
+| `children?` | `BlockChildren` | 子要素（ブロック）． |
+| `position` | `minitype.Flow["position"]` | フローの基準位置．<br>- `"pillar"`：版面上端（縦組の場合は右端）<br>- `"nombre"`：版面下端（縦組の場合は左端）<br>- `"page"`：ページ左上 |
+| `inlineOffset?` | `number` | インライン方向のオフセット（mm）． |
+| `blockOffset?` | `number` | ブロック方向のオフセット（mm）． |
+| `inlineSize?` | `number` | インライン方向のサイズ（mm）． |
+| `page?` | `number \| PageFilter` | 表示するページ（ページ番号またはフィルタ関数）． |
+| `writingMode?` | `WritingMode` | 書字方向． |
+| `zIndex?` | `number` | 重ね順序． |
 
 ## ブロック
 
@@ -96,9 +96,9 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `lang?` | `string` | シンタックスハイライトの言語 |
-| `style?` | `Partial<TextStyle & CodeStyle>` | テキストスタイル + コードスタイル |
-| `children?` | `InlineChildren` | コードテキスト |
+| `children?` | `InlineChildren` | 子要素（インライン，コード文字列）． |
+| `lang?` | `string` | シンタックスハイライトに用いる言語名． |
+| `style?` | `Partial<TextStyle & CodeStyle>` | テキストスタイル + コードブロックスタイル． |
 
 ```tsx
 <Code lang="ts">{`const x: number = 42;`}</Code>
@@ -137,10 +137,10 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `label` | `string` | 脚注のラベル（`<Fn>` と対応させる） |
-| `style?` | `Partial<TextStyle & FootnoteStyle>` | テキストスタイル + 脚注スタイル |
-| `id?` | `string` | ブロックの ID |
-| `children?` | `InlineChildren` | インライン要素またはテキスト |
+| `children?` | `InlineChildren` | 子要素（インライン）． |
+| `label` | `string` | 脚注のラベル（`Fn` と対応させる）． |
+| `style?` | `Partial<TextStyle & FootnoteStyle>` | テキストスタイル + 脚注スタイル． |
+| `id?` | `string` | ブロックの ID． |
 
 ```tsx
 <P>本文テキスト<Fn label="note-1" />．</P>
@@ -155,8 +155,8 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `style?` | `Partial<TableStyle>` | テーブルスタイル |
-| `children?` | `TableChildren` | `<Row>` 要素 |
+| `children?` | `TableChildren` | 子要素（行）． |
+| `style?` | `Partial<TableStyle>` | テーブルスタイル． |
 
 #### `<Row>`
 
@@ -166,7 +166,7 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `children?` | `RowChildren` | `<Cell>` 要素 |
+| `children?` | `RowChildren` | 子要素（セル）． |
 
 #### `<Cell>`
 
@@ -176,8 +176,8 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `colspan?` | `number` | 列の結合数 |
-| `children?` | `BlockChildren` | ブロック要素（1 つのみ） |
+| `children?` | `BlockChildren` | 子要素（ブロック，1 つのみ）． |
+| `colspan?` | `number` | 列の結合数． |
 
 ```tsx
 <Table style={{ columnWidths: [40, 120] }}>
@@ -196,8 +196,8 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `src` | `string` | 画像ファイルのパス |
-| `style?` | `Partial<ImageStyle>` | 画像スタイル |
+| `src` | `string` | 画像ファイルのパス． |
+| `style?` | `Partial<ImageStyle>` | 画像スタイル． |
 
 #### `<Rect>`
 
@@ -205,9 +205,9 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `width` | `number` | 幅（mm） |
-| `height` | `number` | 高さ（mm） |
-| `style?` | `Partial<ShapeStyle>` | 図形スタイル（`align`，`background`，`border` 等） |
+| `width` | `number` | 幅（mm）． |
+| `height` | `number` | 高さ（mm）． |
+| `style?` | `Partial<ShapeStyle>` | 図形スタイル． |
 
 #### `<Ellipse>`
 
@@ -222,9 +222,9 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `style?` | `Partial<BoxStyle>` | ボックススタイル |
-| `semanticType?` | `"image" \| "table" \| "math" \| "code"` | 意味上のブロック種別（ギャップ計算に影響） |
-| `children?` | `BlockChildren` | ブロック要素 |
+| `children?` | `BlockChildren` | 子要素（ブロック）． |
+| `style?` | `Partial<BoxStyle>` | ボックススタイル． |
+| `semanticType?` | `minitype.Box["semanticType"]` | 意味上のブロック種別．gap の計算に使用される． |
 
 ```tsx
 <Box style={{ padding: { top: 5, bottom: 5, left: 10, right: 10 }, background: [{ type: "fill", color: "#f5f5f5" }] }}>
@@ -238,8 +238,8 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `style?` | `Partial<FlexboxStyle>` | フレックスボックススタイル |
-| `children?` | `BlockChildren` | `<Box>` 要素 |
+| `children?` | `BlockChildren` | 子要素（ボックス）． |
+| `style?` | `Partial<FlexboxStyle>` | フレックスボックススタイル． |
 
 ```tsx
 <Flexbox style={{ gap: 5 }}>
@@ -255,8 +255,8 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `position` | `"top" \| "bottom"` | 配置位置 |
-| `children?` | `BlockChildren` | ブロック要素 |
+| `children?` | `BlockChildren` | 子要素（ブロック）． |
+| `position` | `"top" \| "bottom"` | 配置位置． |
 
 #### `<Move>`
 
@@ -264,9 +264,9 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `inlineOffset?` | `number` | インライン方向のオフセット（mm） |
-| `blockOffset?` | `number` | ブロック方向のオフセット（mm） |
-| `children?` | `BlockChildren` | ブロック要素 |
+| `children?` | `BlockChildren` | 子要素（ブロック）． |
+| `inlineOffset?` | `number` | インライン方向のオフセット（mm）． |
+| `blockOffset?` | `number` | ブロック方向のオフセット（mm）． |
 
 #### `<Section>`
 
@@ -275,8 +275,8 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `block?` | `Partial<BlockStyleRecord>` | 子ブロックへ上書きする `BlockStyleRecord` |
-| `children?` | `BlockChildren` | ブロック要素 |
+| `children?` | `BlockChildren` | 子要素（ブロック）． |
+| `block?` | `Partial<BlockStyleRecord>` | 子ブロックへ上書きするスタイル． |
 
 ### ページ制御
 
@@ -298,7 +298,7 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `space` | `number` | スペースの大きさ（mm） |
+| `space` | `number` | スペース量（mm）． |
 
 #### `<Addvspace>`
 
@@ -307,7 +307,7 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `space` | `number` | 加算するスペースの大きさ（mm） |
+| `space` | `number` | 加算するスペースの大きさ（mm）． |
 
 #### `<ResetLabel>`
 
@@ -316,7 +316,7 @@ Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `types?` | `ResetLabelType[]` | リセット対象の種別（省略時は全てリセット） |
+| `types?` | `ResetLabelType[]` | リセットするカウンタの種類．省略時はすべてリセットする． |
 
 `ResetLabelType` の値：`"h1"` `"h2"` `"h3"` `"h4"` `"image"` `"table"` `"math"` `"caption"` `"footnote"`
 

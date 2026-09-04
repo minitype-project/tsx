@@ -20,9 +20,9 @@ import type { AbstractBlockProps } from "./block.js";
  * テキスト系ブロックコンポーネント（{@link P}，{@link H1} 等）の共通 Props．
  */
 export interface TextBlockProps extends AbstractBlockProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
-  /** テキストスタイル．*/
+  /** テキストスタイル． */
   style?: Partial<TextStyle>;
 }
 
@@ -30,7 +30,10 @@ export interface TextBlockProps extends AbstractBlockProps {
  * 見出し系コンポーネント（{@link H1}〜{@link H4}）の Props．
  */
 export interface HeadingProps extends TextBlockProps {
-  /** 番号を付与しない場合に `true` を指定する．*/
+  /**
+   * 番号を付与しないかどうか．`true` の場合，番号を付与しない．
+   * @default false
+   */
   unnumbered?: boolean;
 }
 
@@ -116,11 +119,11 @@ export const Caption = ({
  * {@link Code} コンポーネントの Props．
  */
 export interface CodeProps extends AbstractBlockProps {
-  /** 子要素（インライン，コード文字列）．*/
+  /** 子要素（インライン，コード文字列）． */
   children?: InlineChildren;
-  /** 言語名（シンタックスハイライト用）．*/
+  /** シンタックスハイライトに用いる言語名． */
   lang?: string;
-  /** コードブロックスタイル．*/
+  /** テキストスタイル + コードブロックスタイル． */
   style?: Partial<TextStyle & CodeStyle>;
 }
 
@@ -152,9 +155,9 @@ export const Code = ({
  * リスト系コンポーネント（{@link Li1}，{@link Ol1} 等）の共通 Props．
  */
 export interface ListProps extends AbstractBlockProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
-  /** リストスタイル．*/
+  /** リストスタイル． */
   style?: Partial<TextStyle & ListStyle>;
 }
 
@@ -209,13 +212,13 @@ export const Ol3 = makeList("ordered", 3);
  * {@link Footnote} コンポーネントの Props．
  */
 export interface FootnoteProps {
-  /** 子要素（インライン）．*/
+  /** 子要素（インライン）． */
   children?: InlineChildren;
-  /** 脚注のラベル（{@link Fn} と対応させる）．*/
+  /** 脚注のラベル（{@link Fn} と対応させる）． */
   label: string;
-  /** 脚注スタイル．*/
+  /** テキストスタイル + 脚注スタイル． */
   style?: Partial<TextStyle & FootnoteStyle>;
-  /** ブロックの ID．*/
+  /** ブロックの ID． */
   id?: string;
 }
 
@@ -241,9 +244,9 @@ export const Footnote = ({
  * {@link Math} コンポーネントの Props．
  */
 export interface MathProps extends AbstractBlockProps {
-  /** 子要素（インライン，LaTeX 文字列）．*/
+  /** 子要素（インライン，LaTeX 文字列）． */
   children?: InlineChildren;
-  /** 数式スタイル．*/
+  /** 数式スタイル． */
   style?: Partial<MathStyle>;
 }
 

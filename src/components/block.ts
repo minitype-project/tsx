@@ -32,9 +32,9 @@ import type {
  * ブロック要素の共通 Props．
  */
 export interface AbstractBlockProps {
-  /** ブロックのラベル．*/
+  /** ブロックのラベル． */
   label?: string;
-  /** ブロックの ID．*/
+  /** ブロックの ID． */
   id?: string;
 }
 
@@ -42,9 +42,9 @@ export interface AbstractBlockProps {
  * {@link Image} コンポーネントの Props．
  */
 export interface ImageProps extends AbstractBlockProps {
-  /** 画像ファイルのパス．*/
+  /** 画像ファイルのパス． */
   src: string;
-  /** 画像スタイル．*/
+  /** 画像スタイル． */
   style?: Partial<ImageStyle>;
 }
 
@@ -70,11 +70,11 @@ export const Image = ({
  * {@link Rect}，{@link Ellipse} コンポーネントの Props．
  */
 export interface RectProps extends AbstractBlockProps {
-  /** 幅（mm）．*/
+  /** 幅（mm）． */
   width: number;
-  /** 高さ（mm）．*/
+  /** 高さ（mm）． */
   height: number;
-  /** 図形スタイル．*/
+  /** 図形スタイル． */
   style?: Partial<ShapeStyle>;
 }
 
@@ -152,7 +152,7 @@ export const NewColumn = makePageControl("newcolumn");
  * {@link Vspace}，{@link Addvspace} コンポーネントの Props．
  */
 export interface VspaceProps extends AbstractBlockProps {
-  /** スペース量（mm）．*/
+  /** スペース量（mm）． */
   space: number;
 }
 
@@ -189,11 +189,11 @@ export const Addvspace = ({
  * {@link Box} コンポーネントの Props．
  */
 export interface BoxProps extends AbstractBlockProps {
-  /** 子要素（ブロック）．*/
+  /** 子要素（ブロック）． */
   children?: BlockChildren;
-  /** ボックススタイル．*/
+  /** ボックススタイル． */
   style?: Partial<BoxStyle>;
-  /** セマンティック型．*/
+  /** 意味上のブロック種別．gap の計算に使用される． */
   semanticType?: minitype.Box["semanticType"];
 }
 
@@ -221,9 +221,9 @@ export const Box = ({
  * {@link Flexbox} コンポーネントの Props．
  */
 export interface FlexboxProps extends AbstractBlockProps {
-  /** 子要素（`<Box>`）．*/
+  /** 子要素（ボックス）． */
   children?: BlockChildren;
-  /** フレックスボックススタイル．*/
+  /** フレックスボックススタイル． */
   style?: Partial<FlexboxStyle>;
 }
 
@@ -249,9 +249,9 @@ export const Flexbox = ({
  * {@link Section} コンポーネントの Props．
  */
 export interface SectionProps extends AbstractBlockProps {
-  /** 子要素（ブロック）．*/
+  /** 子要素（ブロック）． */
   children?: BlockChildren;
-  /** 子ブロックに継承するスタイル．*/
+  /** 子ブロックへ上書きするスタイル． */
   block?: Partial<BlockStyleRecord>;
 }
 
@@ -277,9 +277,9 @@ export const Section = ({
  * {@link Table} コンポーネントの Props．
  */
 export interface TableProps extends AbstractBlockProps {
-  /** 子要素（行）．*/
+  /** 子要素（行）． */
   children?: TableChildren;
-  /** テーブルスタイル．*/
+  /** テーブルスタイル． */
   style?: Partial<TableStyle>;
 }
 
@@ -305,7 +305,7 @@ export const Table = ({
  * {@link Row} コンポーネントの Props．
  */
 export interface RowProps {
-  /** 子要素（セル）．*/
+  /** 子要素（セル）． */
   children?: RowChildren;
 }
 
@@ -320,9 +320,9 @@ export const Row = ({ children }: RowProps): minitype.TableCell[] => {
  * {@link Cell} コンポーネントの Props．
  */
 export interface CellProps {
-  /** 子要素（ブロック，1 つのみ）．*/
+  /** 子要素（ブロック，1 つのみ）． */
   children?: BlockChildren;
-  /** 列結合数．*/
+  /** 列の結合数． */
   colspan?: number;
 }
 
@@ -337,9 +337,9 @@ export const Cell = ({ children, colspan }: CellProps): minitype.TableCell => {
  * {@link Float} コンポーネントの Props．
  */
 export interface FloatProps extends AbstractBlockProps {
-  /** 子要素（ブロック）．*/
+  /** 子要素（ブロック）． */
   children?: BlockChildren;
-  /** 配置位置（`"top"` または `"bottom"`）．*/
+  /** 配置位置． */
   position: "top" | "bottom";
 }
 
@@ -365,11 +365,11 @@ export const Float = ({
  * {@link Move} コンポーネントの Props．
  */
 export interface MoveProps extends AbstractBlockProps {
-  /** 子要素（ブロック）．*/
+  /** 子要素（ブロック）． */
   children?: BlockChildren;
-  /** インライン方向のオフセット（mm）．*/
+  /** インライン方向のオフセット（mm）． */
   inlineOffset?: number;
-  /** ブロック方向のオフセット（mm）．*/
+  /** ブロック方向のオフセット（mm）． */
   blockOffset?: number;
 }
 
@@ -397,7 +397,7 @@ export const Move = ({
  * {@link ResetLabel} コンポーネントの Props．
  */
 export interface ResetLabelProps extends AbstractBlockProps {
-  /** リセットするカウンタの種類．*/
+  /** リセットするカウンタの種類．省略時はすべてリセットする． */
   types?: ResetLabelType[];
 }
 
