@@ -56,14 +56,14 @@ export const NoSplit = (): minitype.NoSplit => {
  */
 export interface CidProps {
   /** CID 番号．*/
-  id: number;
+  cid: number;
 }
 
 /**
  * CID 直接指定．
  */
-export const Cid = ({ id }: CidProps): minitype.Cid => {
-  return { type: "cid", cid: id };
+export const Cid = ({ cid }: CidProps): minitype.Cid => {
+  return { type: "cid", cid };
 };
 
 /**

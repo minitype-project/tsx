@@ -117,13 +117,23 @@
 #### `<Hbox>`
 
 水平ボックス（固定幅のインラインコンテナ）．
+`fill` と `children` は排他的で，`fill` を指定した場合は `children` を渡せない．
+
+**インライン要素を内包する場合（`HboxBodyProps`）：**
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
 | `width` | `HboxWidth` | 幅 |
-| `fill?` | `string` | 指定した文字列で幅を埋める |
 | `align?` | `"left" \| "center" \| "right" \| "justify"` | 文字揃え |
-| `children?` | `InlineChildren` | インライン要素またはテキスト（`fill` 未指定時） |
+| `children?` | `InlineChildren` | インライン要素またはテキスト |
+
+**指定文字で幅を埋める場合（`HboxFillProps`）：**
+
+| Prop | 型 | 説明 |
+| --- | --- | --- |
+| `width` | `HboxWidth` | 幅 |
+| `fill` | `string` | 塗りつぶし文字 |
+| `align?` | `"left" \| "center" \| "right" \| "justify"` | 文字揃え |
 
 #### `<InlineGraphic>`
 
@@ -139,10 +149,11 @@
 #### `<InlineMath>`
 
 インライン数式（LaTeX）．
+children に LaTeX 文字列を渡す．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `latex` | `string` | LaTeX 文字列 |
+| `children?` | `InlineChildren` | LaTeX 文字列 |
 | `size?` | `number \| Em` | フォントサイズ |
 
 ## インライン制御
@@ -204,7 +215,7 @@ CID 直接指定．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `id` | `number` | CID 値 |
+| `cid` | `number` | CID 値 |
 
 #### `<Fn>`
 

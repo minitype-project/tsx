@@ -286,8 +286,8 @@ export const InlineGraphic = ({
  * {@link InlineMath} コンポーネントの Props．
  */
 export interface InlineMathProps {
-  /** LaTeX 数式文字列．*/
-  latex: string;
+  /** 子要素（LaTeX 文字列）．*/
+  children?: InlineChildren;
   /** 数式サイズ．*/
   size?: number | Em;
 }
@@ -296,9 +296,13 @@ export interface InlineMathProps {
  * インライン数式（LaTeX）．
  */
 export const InlineMath = ({
-  latex,
+  children,
   size,
 }: InlineMathProps): minitype.InlineMath => {
+  const flat = collectInlines(children);
+  const latex = flat
+    .map((item) => (typeof item === "string" ? item : ""))
+    .join("");
   return {
     type: "inline-math",
     latex,
@@ -307,40 +311,52 @@ export const InlineMath = ({
 };
 
 /**
- * {@link Hbox} コンポーネントの Props．
+ * {@link Hbox} の共通 Props．
  */
-export interface HboxProps {
-  /** 子要素（インライン）．*/
-  children?: InlineChildren;
+interface HboxBaseProps {
   /** ボックス幅．*/
   width: HboxWidth;
-  /** 塗りつぶし文字．*/
-  fill?: string;
   /** 水平配置．*/
   align?: "left" | "center" | "right" | "justify";
 }
 
 /**
- * 水平ボックス（固定幅のインラインコンテナ）．
+ * インライン要素を内包する {@link Hbox} の Props．
  */
-export const Hbox = ({
-  children,
-  width,
-  fill,
-  align,
-}: HboxProps): minitype.Hbox => {
-  if (fill !== undefined) {
-    return {
-      type: "hbox",
-      blockSize: width,
-      fill,
-      align,
-    };
+export interface HboxBodyProps extends HboxBaseProps {
+  /** 子要素（インライン）．*/
+  children?: InlineChildren;
+  fill?: never;
+}
+
+/**
+ * 指定文字で幅を埋める {@link Hbox} の Props．
+ */
+export interface HboxFillProps extends HboxBaseProps {
+  /** 塗りつぶし文字．*/
+  fill: string;
+  children?: never;
+}
+
+/**
+ * {@link Hbox} コンポーネントの Props．
+ * `fill` と `children` は排他的で，`fill` を指定した場合は `children` を渡せない．
+ */
+export type HboxProps = HboxBodyProps | HboxFillProps;
+
+/**
+ * 水平ボックス（固定幅のインラインコンテナ）．
+ * `fill` を指定した場合は指定文字で幅を埋める．それ以外は `children` を内包する．
+ */
+export const Hbox = (props: HboxProps): minitype.Hbox => {
+  const { width, align } = props;
+  if ("fill" in props && props.fill !== undefined) {
+    return { type: "hbox", blockSize: width, fill: props.fill, align };
   }
   return {
     type: "hbox",
     blockSize: width,
-    body: collectInlines(children),
+    body: collectInlines((props as HboxBodyProps).children),
     align,
   };
 };
