@@ -70,7 +70,7 @@ export const Cid = ({ cid }: CidProps): minitype.Cid => {
  * {@link Fn} コンポーネントの Props．
  */
 export interface FnProps {
-  /** 脚注ラベル（{@link Footnote} の `label` と対応）．*/
+  /** 参照する脚注のラベル（{@link Footnote} の `label` と対応）．*/
   label: string;
 }
 

@@ -48,8 +48,8 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `value` | `Color` | 文字色（CSS カラー文字列または `[r, g, b]`） |
-| `children?` | `InlineChildren` | インライン要素またはテキスト |
+| `children?` | `InlineChildren` | 子要素（インライン） |
+| `value` | `MinitypeColor` | 文字色 |
 
 #### `<FontSize>`
 
@@ -57,8 +57,8 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `size` | `number` | フォントサイズ（mm） |
-| `children?` | `InlineChildren` | インライン要素またはテキスト |
+| `children?` | `InlineChildren` | 子要素（インライン） |
+| `size` | `number` | 文字サイズ（mm） |
 
 #### `<Scale>`
 
@@ -66,8 +66,8 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
+| `children?` | `InlineChildren` | 子要素（インライン） |
 | `factor` | `Em` | スケール（em 単位） |
-| `children?` | `InlineChildren` | インライン要素またはテキスト |
 
 #### `<Overline>`
 
@@ -75,8 +75,8 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
+| `children?` | `InlineChildren` | 子要素（インライン） |
 | `line` | `Line` | 上線のスタイル |
-| `children?` | `InlineChildren` | インライン要素またはテキスト |
 
 #### `<Ruby>`
 
@@ -97,8 +97,8 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `href` | `string` | リンク先 URL |
-| `children?` | `InlineChildren` | リンクテキスト（省略時は URL を表示） |
+| `href` | `string` | リンク先の URL |
+| `children?` | `InlineChildren` | 表示されるテキスト（省略時は URL を表示） |
 
 #### `<Command>`
 
@@ -107,12 +107,12 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `name?` | `string` | コマンド名（`command` スタイルと対応させる） |
-| `style?` | `CommandStyle` | インラインスタイルを直接指定 |
+| `children?` | `InlineChildren` | 子要素（インライン） |
+| `name?` | `string` | コマンド名（`DocumentStyle.command` のキー） |
+| `style?` | `Partial<CommandStyle>` | コマンドスタイル |
 | `label?` | `string` | ラベル |
 | `id?` | `string` | ID |
 | `link?` | `Link` | リンク |
-| `children?` | `InlineChildren` | インライン要素またはテキスト |
 
 #### `<Hbox>`
 
@@ -142,7 +142,7 @@
 | Prop | 型 | 説明 |
 | --- | --- | --- |
 | `src` | `string` | 画像ファイルのパス |
-| `size?` | `number \| Em` | サイズ |
+| `size?` | `number \| Em` | 画像サイズ |
 | `blockOffset?` | `number \| Em` | ブロック方向のオフセット |
 | `page?` | `number` | PDF 埋め込み時のページ番号（1-based） |
 
@@ -153,8 +153,8 @@ children に LaTeX 文字列を渡す．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `children?` | `InlineChildren` | LaTeX 文字列 |
-| `size?` | `number \| Em` | フォントサイズ |
+| `children?` | `InlineChildren` | 子要素（LaTeX 文字列） |
+| `size?` | `number \| Em` | 文字サイズ |
 
 ## インライン制御
 
@@ -215,7 +215,7 @@ CID 直接指定．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `cid` | `number` | CID 値 |
+| `cid` | `number` | CID 番号 |
 
 #### `<Fn>`
 
@@ -224,4 +224,4 @@ CID 直接指定．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `label` | `string` | 参照する脚注のラベル |
+| `label` | `string` | 参照する脚注のラベル（{@link Footnote} の `label` と対応） |

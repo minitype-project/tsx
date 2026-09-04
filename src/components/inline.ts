@@ -121,7 +121,7 @@ export const FontSize = ({ children, size }: FontSizeProps): InlineSegments => {
 export interface ScaleProps {
   /** 子要素（インライン）．*/
   children?: InlineChildren;
-  /** スケール係数．*/
+  /** スケール（em 単位）．*/
   factor: Em;
 }
 
@@ -142,7 +142,7 @@ export const Scale = ({ children, factor }: ScaleProps): InlineSegments => {
 export interface OverlineProps {
   /** 子要素（インライン）．*/
   children?: InlineChildren;
-  /** 上線スタイル．*/
+  /** 上線のスタイル．*/
   line: Line;
 }
 
@@ -161,9 +161,9 @@ export const Overline = ({ children, line }: OverlineProps): InlineSegments => {
  * {@link Ruby} コンポーネントの Props．
  */
 export interface RubyProps {
-  /** ルビテキスト．*/
+  /** ルビ文字．*/
   ruby: string;
-  /** ベーステキスト．*/
+  /** 親文字．*/
   children: string;
 }
 
@@ -188,7 +188,7 @@ export const Ruby = ({
 export interface UrlProps {
   /** リンク先の URL．*/
   href: string;
-  /** 表示テキスト（省略時は URL を表示）．*/
+  /** 表示されるテキスト（省略時は URL を表示）．*/
   children?: InlineChildren;
 }
 
@@ -260,7 +260,7 @@ export interface InlineGraphicProps {
   size?: number | Em;
   /** ブロック方向のオフセット．*/
   blockOffset?: number | Em;
-  /** PDF のページ番号．*/
+  /** PDF 埋め込み時のページ番号（1-based）．*/
   page?: number;
 }
 
@@ -288,7 +288,7 @@ export const InlineGraphic = ({
 export interface InlineMathProps {
   /** 子要素（LaTeX 文字列）．*/
   children?: InlineChildren;
-  /** 数式サイズ．*/
+  /** 文字サイズ．*/
   size?: number | Em;
 }
 
