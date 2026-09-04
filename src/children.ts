@@ -88,7 +88,10 @@ const inlineLabel = (child: unknown): string => {
  * CJK 文字間の不要な空白を除去する．欧文の単語間スペースは保持する．
  */
 const removeCjkSpaces = (text: string): string => {
-  return text.replace(/(?<=[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]) +(?=[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF])/g, "");
+  return text.replace(
+    /(?<=[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]) +(?=[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF])/g,
+    "",
+  );
 };
 
 /**

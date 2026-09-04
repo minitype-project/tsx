@@ -5,6 +5,13 @@
   "author": "Yuto Wada",
   "license": "MIT",
   "homepage": "https://typeset.jp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minitype-project/tsx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/minitype-project/tsx/issues"
+  },
   "keywords": [
     "minitype",
     "typesetting",
@@ -46,7 +53,8 @@
     "prepare": "husky",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sample": "cd sample && tsx index.tsx"
+    "sample": "cd sample && tsx index.tsx",
+    "docs": "tsx scripts/gen-docs.ts"
   },
   "peerDependencies": {
     "@minitype/minitype": ">=0.1.0"
@@ -55,6 +63,7 @@
     "@biomejs/biome": "^2.5.4",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
+    "@types/node": "^26.4.1",
     "husky": "^9.1.7",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
