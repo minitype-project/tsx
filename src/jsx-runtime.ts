@@ -42,6 +42,7 @@ export type JsxElement =
   | DocumentResult
   | Flow
   | Block
+  | BlockExtender
   | InlineOrExtender
   | LineBreak
   | Group
