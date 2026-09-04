@@ -103,7 +103,7 @@ export interface FlowProps {
 }
 
 /**
- * フロー．版面上端・下端・ページ左上を基準に要素を絶対配置する．
+ * フロー．版面上端，下端，ページ左上を基準に要素を絶対配置する．
  */
 export const Flow = ({
   children,

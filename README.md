@@ -7,7 +7,7 @@ JSX 記法を用いた minitype の文書記述を実現するコンポーネン
 It provides a set of components and a JSX runtime for writing typesetting documents in JSX syntax.
 
 - [コンポーネント一覧（ドキュメント，ブロック）](./docs/components/document-block.md)
-- [コンポーネント一覧（インライン）](./docs/components/document-inline.md)
+- [コンポーネント一覧（インライン）](./docs/components/inline.md)
 - [開発ガイド](./docs/development.md)
 
 ## セットアップ

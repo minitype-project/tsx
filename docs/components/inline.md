@@ -102,13 +102,16 @@
 
 #### `<Command>`
 
-汎用インライン装飾．`DocumentStyle.command` に定義したスタイルを名前で適用する．
+汎用インライン装飾．
+`DocumentStyle.command` に定義したスタイルを名前で適用する．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
 | `name?` | `string` | コマンド名（`command` スタイルと対応させる） |
 | `style?` | `CommandStyle` | インラインスタイルを直接指定 |
 | `label?` | `string` | ラベル |
+| `id?` | `string` | ID |
+| `link?` | `Link` | リンク |
 | `children?` | `InlineChildren` | インライン要素またはテキスト |
 
 #### `<Hbox>`
@@ -142,15 +145,13 @@
 | `latex` | `string` | LaTeX 文字列 |
 | `size?` | `number \| Em` | フォントサイズ |
 
----
-
 ## インライン制御
 
 #### `<Br>`
 
-行区切り．minitype の `InlineOrExtender[][]`（行の配列）における行の境界を作る．
+行区切り．
+minitype の `InlineOrExtender[][]`（行の配列）における行の境界を作る．
 テキストブロック（`<P>` 等）内で複数行を明示的に指定したい場合に使用する．
-
 Props なし．
 
 ```tsx
@@ -175,8 +176,8 @@ Props なし．
 
 #### `<Fbr>`
 
-強制改行（minitype の `fbr`）．行を途中で折り返す．`<Br />` とは異なり，`InlineOrExtender[][]` の行境界ではなく，行中での改行を表す．
-
+強制改行（minitype の `fbr`）．行を途中で折り返す．
+`<Br />` とは異なり，`InlineOrExtender[][]` の行境界ではなく，行中での改行を表す．
 Props なし．
 
 #### `<Kern>`
@@ -189,11 +190,13 @@ Props なし．
 
 #### `<NoBreak>`
 
-行分割禁止．Props なし．
+行分割禁止．
+Props なし．
 
 #### `<NoSplit>`
 
-行分割・トラッキング挿入禁止．Props なし．
+行分割およびトラッキング挿入の禁止．
+Props なし．
 
 #### `<Cid>`
 
@@ -205,7 +208,8 @@ CID 直接指定．
 
 #### `<Fn>`
 
-脚注参照マーカ．`<Footnote>` と `label` を対応させる．
+脚注参照マーカ．
+`<Footnote>` と `label` を対応させる．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |

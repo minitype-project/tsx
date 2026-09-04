@@ -30,18 +30,42 @@
 
 ### `<Group>`
 
-ページグループ要素．ページサイズやスタイルを切り替える単位．
+ページグループ要素．
+ページサイズやスタイルを切り替える単位．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
 | `style?` | `Partial<GroupStyle>` | グループ固有のスタイル（`DocumentStyle` から `size` を除いたもの） |
 | `pageIndex?` | `number` | グループ開始ページ番号（省略時はドキュメントの通し番号） |
 | `labelOptions?` | `GroupLabelOptions` | ラベル関連の設定 |
+| `children?` | `BodyChildren` | ブロック要素，`<Flow>` 要素 |
+
+### `<Flow>`
+
+版面上端，下端，ページ左上を基準に要素を絶対配置する．
+柱やノンブルの配置に使用する．
+
+| Prop | 型 | 説明 |
+| --- | --- | --- |
+| `position` | `"pillar" \| "nombre" \| "page"` | 基準位置（版面上端 / 版面下端 / ページ左上） |
+| `inlineOffset?` | `number` | インライン方向のオフセット（mm） |
+| `blockOffset?` | `number` | ブロック方向のオフセット（mm） |
+| `inlineSize?` | `number` | インライン方向のサイズ（mm） |
+| `page?` | `number \| PageFilter` | 表示するページ（ページ番号またはフィルタ関数） |
+| `writingMode?` | `WritingMode` | 書字方向 |
+| `zIndex?` | `number` | 重ね順序 |
 | `children?` | `BlockChildren` | ブロック要素 |
 
----
-
 ## ブロック
+
+### ブロックの共通 Props
+
+`<Flow>`，`<Row>`，`<Cell>` を除くすべてのブロックコンポーネントは，以下の共通する Props を持つ．
+
+| Prop | 型 | 説明 |
+| --- | --- | --- |
+| `label?` | `string` | 相互参照で用いるラベル |
+| `id?` | `string` | ブロックの ID |
 
 ### テキスト
 
@@ -80,7 +104,7 @@
 <Code lang="ts">{`const x: number = 42;`}</Code>
 ```
 
-#### `<Math>`
+#### `<MathBlock>`
 
 数式ブロック（LaTeX）．
 
@@ -90,7 +114,7 @@
 | `children?` | `InlineChildren` | LaTeX 文字列 |
 
 ```tsx
-<Math>{String.raw`\int_0^\infty e^{-x}\,dx = 1`}</Math>
+<MathBlock>{String.raw`\int_0^\infty e^{-x}\,dx = 1`}</MathBlock>
 ```
 
 #### `<Li1>` `<Li2>` `<Li3>`
@@ -109,19 +133,19 @@
 #### `<Footnote>`
 
 脚注本文．`<Fn>` で参照する．
+`<Footnote>` の `label` は相互参照ラベルではなく `<Fn>` との対応付けに使用するキーであるため，必須かつ意味が異なる．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
 | `label` | `string` | 脚注のラベル（`<Fn>` と対応させる） |
 | `style?` | `Partial<TextStyle & FootnoteStyle>` | テキストスタイル + 脚注スタイル |
+| `id?` | `string` | ブロックの ID |
 | `children?` | `InlineChildren` | インライン要素またはテキスト |
 
 ```tsx
 <P>本文テキスト<Fn label="note-1" />．</P>
 <Footnote label="note-1">脚注の内容．</Footnote>
 ```
-
----
 
 ### テーブル
 
@@ -136,7 +160,9 @@
 
 #### `<Row>`
 
-テーブルの行．`<Cell>` 要素の配列を返す．
+テーブルの行．
+`<Cell>` 要素の配列を返す．
+Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
@@ -144,7 +170,9 @@
 
 #### `<Cell>`
 
-テーブルのセル．子要素はブロック要素 1 つのみ受け付ける．
+テーブルのセル．
+子要素はブロック要素 1 つのみ受け付ける．
+Props なし（`label`，`id` も持たない）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
@@ -160,9 +188,7 @@
 </Table>
 ```
 
----
-
-### 図・図形
+### 図，図形
 
 #### `<Image>`
 
@@ -187,13 +213,12 @@
 
 楕円．Props は `<Rect>` と同じ．
 
----
-
-### ボックス・セクション
+### ボックス，セクション
 
 #### `<Box>`
 
-ブロック要素をまとめるコンテナ．背景・枠線・段組・テキスト回り込み等を設定できる．
+ブロック要素をまとめるコンテナ．
+背景，枠線，段組，テキストの回り込み等を設定できる．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
@@ -213,7 +238,7 @@
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `style?` | `Partial<FlexboxStyle>` | フレックスボックス��タイル |
+| `style?` | `Partial<FlexboxStyle>` | フレックスボックススタイル |
 | `children?` | `BlockChildren` | `<Box>` 要素 |
 
 ```tsx
@@ -225,7 +250,8 @@
 
 #### `<Float>`
 
-フロート配置コンテナ．ページ上端または下端に固定して配置する．
+フロート配置コンテナ．
+ページ上端または下端に固定して配置する．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
@@ -244,28 +270,27 @@
 
 #### `<Section>`
 
-スタイルを子ブロックに継承する透過的なコンテナ．レイアウトには影響しない．
+スタイルを子ブロックに継承する透過的なコンテナ．
+レイアウトには影響しない．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
 | `block?` | `Partial<BlockStyleRecord>` | 子ブロックへ上書きする `BlockStyleRecord` |
 | `children?` | `BlockChildren` | ブロック要素 |
 
----
-
 ### ページ制御
 
 #### `<NewPage>`
 
-改ページ．Props なし．
+改ページ．
 
 #### `<ClearPage>`
 
-フロートを出力してから改ページ．Props なし．
+フロートを出力してから改ページ．
 
 #### `<NewColumn>`
 
-改段．Props なし．
+改段．
 
 #### `<Vspace>`
 
@@ -277,7 +302,8 @@
 
 #### `<Addvspace>`
 
-垂直スペース（加算）．既存のブロック間 gap に加算する．
+垂直スペース（加算）．
+既存のブロック間 gap に加算する．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
@@ -285,7 +311,8 @@
 
 #### `<ResetLabel>`
 
-カウンタリセット．見出し番号・図番号等をリセットする．
+カウンタリセット．
+見出し番号，図番号等をリセットする．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |

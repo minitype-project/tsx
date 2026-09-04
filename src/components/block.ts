@@ -67,7 +67,7 @@ export const Image = ({
 };
 
 /**
- * {@link Rect}・{@link Ellipse} コンポーネントの Props．
+ * {@link Rect}，{@link Ellipse} コンポーネントの Props．
  */
 export interface RectProps extends AbstractBlockProps {
   /** 幅（mm）．*/
@@ -121,7 +121,7 @@ export const Ellipse = ({
 };
 
 /**
- * {@link NewPage}・{@link ClearPage}・{@link NewColumn} の共通 Props．
+ * {@link NewPage}，{@link ClearPage}，{@link NewColumn} の共通 Props．
  */
 export interface PageControlProps extends AbstractBlockProps {}
 
@@ -149,7 +149,7 @@ export const ClearPage = makePageControl("clearpage");
 export const NewColumn = makePageControl("newcolumn");
 
 /**
- * {@link Vspace}・{@link Addvspace} コンポーネントの Props．
+ * {@link Vspace}，{@link Addvspace} コンポーネントの Props．
  */
 export interface VspaceProps extends AbstractBlockProps {
   /** スペース量（mm）．*/
@@ -402,7 +402,7 @@ export interface ResetLabelProps extends AbstractBlockProps {
 }
 
 /**
- * カウンタリセット．見出し番号・図番号などをリセットする．
+ * カウンタリセット．見出し番号，図番号などをリセットする．
  */
 export const ResetLabel = ({
   types,

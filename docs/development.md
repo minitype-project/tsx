@@ -12,7 +12,7 @@ yarn check
 # サンプル PDF を生成（sample/output.pdf に出力）
 yarn sample
 
-# ライセンスヘッダの付与・検証（addlicense）
+# ライセンスヘッダの付与，検証（addlicense）
 yarn license        # ライセンスヘッダを付与
 yarn license:check  # ライセンスヘッダの付与状況を確認
 
@@ -23,7 +23,7 @@ yarn changelog
 actionlint .github/workflows/<file>.yml
 ```
 
-## 開発・リリース手順
+## 開発，リリース手順
 
 ### コミットメッセージ
 
@@ -42,7 +42,7 @@ husky によって `git commit` 時に commitlint が実行される．
 | `feat` | 新機能 |
 | `fix` | バグ修正 |
 | `docs` | ドキュメント |
-| `chore` | ビルド・設定・依存関係 |
+| `chore` | ビルド，設定，依存関係 |
 | `refactor` | リファクタリング |
 | `test` | テスト |
 
@@ -80,7 +80,7 @@ const greet = (name: string) => `Hello, ${name}`;
 
 ### 制御構文
 
-`if`・`for` の本体が 1 行でも中括弧を省略しない．
+`if`，`for` の本体が 1 行でも中括弧を省略しない．
 
 ```ts
 // OK
@@ -118,6 +118,6 @@ TSDoc に関しては，フィールドを除いて複数行で記述する．
  */
 ```
 
-### エラー・ログメッセージ
+### エラー，ログメッセージ
 
 `console.error`，`new Error()` 等のユーザ向けメッセージは英語で記述する．

@@ -45,7 +45,7 @@ export const NoBreak = (): minitype.NoBreak => {
 };
 
 /**
- * 行分割・トラッキング挿入禁止．
+ * 行分割，トラッキング挿入禁止．
  */
 export const NoSplit = (): minitype.NoSplit => {
   return { type: "no-split" };
