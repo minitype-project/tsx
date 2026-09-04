@@ -4,7 +4,8 @@
 
 ### `<Document>`
 
-ドキュメントのルート要素．`groups`（`Group[]`）と `style`（`Partial<DocumentStyle>`）を持つオブジェクトを返す．
+ドキュメントのルート要素．
+`groups`（`Group[]`）と `style`（`Partial<DocumentStyle>`）を持つオブジェクトを返す．
 返り値を `minitype()` に渡す．
 
 | Prop | 型 | 説明 |
@@ -78,17 +79,21 @@
 | `style?` | `Partial<TextStyle>` | テキストスタイル |
 | `children?` | `InlineChildren` | インライン要素またはテキスト |
 
-#### `<H1>` `<H2>` `<H3>` `<H4>`
+#### `<H1>`，`<H2>`，`<H3>`，`<H4>`
 
-見出し（レベル 1〜4）．`<P>` の Props に加えて以下を持つ．
+<!-- Props: HeadingProps -->
+
+見出し（レベル 1〜4）．
+`<P>` の Props に加えて以下を持つ．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `unnumbered?` | `boolean` | `true` を指定すると番号を付与しない |
+| `unnumbered?` | `boolean` | 番号を付与しないかどうか．`true` の場合，番号を付与しない．（デフォルト：`false`） |
 
 #### `<Caption>`
 
-キャプション．Props は `<P>` と同じ．
+キャプション．
+Props は `<P>` と同じ．
 
 #### `<Code>`
 
@@ -117,18 +122,21 @@
 <MathBlock>{String.raw`\int_0^\infty e^{-x}\,dx = 1`}</MathBlock>
 ```
 
-#### `<Li1>` `<Li2>` `<Li3>`
+#### `<Li1>`，`<Li2>`，`<Li3>`
+
+<!-- Props: ListProps -->
 
 順序なしリスト（レベル 1〜3）．
 
 | Prop | 型 | 説明 |
 | --- | --- | --- |
-| `style?` | `Partial<TextStyle & ListStyle>` | テキストスタイル + リストスタイル |
-| `children?` | `InlineChildren` | インライン要素またはテキスト |
+| `children?` | `InlineChildren` | 子要素（インライン）． |
+| `style?` | `Partial<TextStyle & ListStyle>` | リストスタイル． |
 
-#### `<Ol1>` `<Ol2>` `<Ol3>`
+#### `<Ol1>`，`<Ol2>`，`<Ol3>`
 
-順序付きリスト（レベル 1〜3）．Props は `<Li1>` と同じ．
+順序付きリスト（レベル 1〜3）．
+Props は `<Li1>` と同じ．
 
 #### `<Footnote>`
 
@@ -318,6 +326,6 @@ Props なし（`label`，`id` も持たない）．
 | --- | --- | --- |
 | `types?` | `ResetLabelType[]` | リセットするカウンタの種類．省略時はすべてリセットする． |
 
-`ResetLabelType` の値：`"h1"` `"h2"` `"h3"` `"h4"` `"image"` `"table"` `"math"` `"caption"` `"footnote"`
+`ResetLabelType` の値：`"h1"`，`"h2"`，`"h3"`，`"h4"`，`"image"`，`"table"`，`"math"`，`"caption"`，`"footnote"`
 
 ---

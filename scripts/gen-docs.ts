@@ -247,7 +247,7 @@ const generateTable = (props: PropInfo[]): string => {
 /**
  * 見出し行からコンポーネント名を抽出する．
  * `` ### `<Figure>` `` のようにコンポーネントが 1 つのみ記載された見出しを対象とし，
- * `` #### `<H1>` `<H2>` `` のような複数記載の行はスキップする（`null` を返す）．
+ * `` #### `<H1>`，`<H2>` `` のような複数記載の行はスキップする（`null` を返す）．
  * @param line markdown の 1 行．
  */
 const extractComponentName = (line: string): string | null => {

@@ -8,6 +8,7 @@ import type {
   Block,
   BlockExtender,
   DocumentStyle,
+  EasyCell,
   Flow,
   Group,
   InlineOrExtender,
@@ -17,6 +18,42 @@ import type {
 // ------
 // 型定義
 // ------
+/**
+ * {@link Dt} コンポーネントが返す，説明リストの見出しのタグ付きラッパー型．
+ * {@link collectDescriptionItems} がこの型を識別するために使用する．
+ */
+export type DescTermWrapper = {
+  readonly type: "descTermWrapper";
+  term: InlineOrExtender[];
+};
+
+/**
+ * {@link Dd} コンポーネントが返す，説明リストの本文のタグ付きラッパー型．
+ * {@link collectDescriptionItems} がこの型を識別するために使用する．
+ */
+export type DescBodyWrapper = {
+  readonly type: "descBodyWrapper";
+  body: InlineOrExtender[];
+};
+
+/**
+ * {@link Td} コンポーネントが返す，`EasyCell` のタグ付きラッパー型．
+ * {@link collectEasyCells} がこの型を識別するために使用する．
+ */
+export type EasyCellWrapper = {
+  readonly type: "easyCellWrapper";
+  cell: EasyCell;
+};
+
+/**
+ * {@link Tr} コンポーネントが返す，`EasyCell[]` のタグ付きラッパー型．
+ * {@link collectEasyRows} がこの型を識別するために使用する．
+ */
+export type EasyRowWrapper = {
+  readonly type: "easyRowWrapper";
+  cells: EasyCell[];
+};
+
 /**
  * 行区切りを表すタグ付きユニオンの判別子型．
  * `<Br />` が返す値であり，`collectInlineLines` が新しい行の開始として扱う．
@@ -29,9 +66,9 @@ export type LineBreak = { readonly type: "br" };
  * minitype() に渡す Group[] と {@link DocumentStyle} を格納する．
  */
 export interface DocumentResult {
-  /** ページグループの配列．*/
+  /** ページグループの配列． */
   groups: Group[];
-  /** ドキュメントスタイル．*/
+  /** ドキュメントスタイル． */
   style?: Partial<DocumentStyle>;
 }
 
@@ -48,6 +85,10 @@ export type JsxElement =
   | Group
   | TableCell[]
   | TableCell
+  | DescTermWrapper
+  | DescBodyWrapper
+  | EasyCellWrapper
+  | EasyRowWrapper
   | JsxElement[]
   | null
   | undefined;
@@ -98,6 +139,37 @@ export type TableChildren = TableCell[] | TableChildren[] | JsxElement | Falsy;
  * `<Row>` に使用する．
  */
 export type RowChildren = TableCell | RowChildren[] | JsxElement | Falsy;
+
+/**
+ * {@link Description} の children 型（{@link DescTermWrapper} と {@link DescBodyWrapper} の交互列）．
+ * `<Description>` に使用する．
+ */
+export type DescriptionChildren =
+  | DescTermWrapper
+  | DescBodyWrapper
+  | DescriptionChildren[]
+  | JsxElement
+  | Falsy;
+
+/**
+ * {@link Easytable} の children 型（{@link EasyRowWrapper} の配列）．
+ * `<Easytable>` に使用する．
+ */
+export type EasytableChildren =
+  | EasyRowWrapper
+  | EasytableChildren[]
+  | JsxElement
+  | Falsy;
+
+/**
+ * {@link Tr} の children 型（{@link EasyCellWrapper} の配列）．
+ * `<Tr>` に使用する．
+ */
+export type EasyRowChildren =
+  | EasyCellWrapper
+  | EasyRowChildren[]
+  | JsxElement
+  | Falsy;
 
 /**
  * インライン要素の children 型．

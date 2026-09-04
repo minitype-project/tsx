@@ -187,7 +187,8 @@ Props なし．
 
 #### `<Fbr>`
 
-強制改行（minitype の `fbr`）．行を途中で折り返す．
+強制改行（minitype の `fbr`）．
+行を途中で折り返す．
 `<Br />` とは異なり，`InlineOrExtender[][]` の行境界ではなく，行中での改行を表す．
 Props なし．
 

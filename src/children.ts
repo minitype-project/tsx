@@ -68,6 +68,50 @@ const isTableCellArray = (value: unknown): value is TableCell[] => {
 };
 
 /**
+ * 値が {@link DescTermWrapper} であるかを判定する．
+ */
+const isDescTermWrapper = (value: unknown): value is DescTermWrapper => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as { type?: unknown }).type === "descTermWrapper"
+  );
+};
+
+/**
+ * 値が {@link DescBodyWrapper} であるかを判定する．
+ */
+const isDescBodyWrapper = (value: unknown): value is DescBodyWrapper => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as { type?: unknown }).type === "descBodyWrapper"
+  );
+};
+
+/**
+ * 値が {@link EasyCellWrapper} であるかを判定する．
+ */
+const isEasyCellWrapper = (value: unknown): value is EasyCellWrapper => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as { type?: unknown }).type === "easyCellWrapper"
+  );
+};
+
+/**
+ * 値が {@link EasyRowWrapper} であるかを判定する．
+ */
+const isEasyRowWrapper = (value: unknown): value is EasyRowWrapper => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as { type?: unknown }).type === "easyRowWrapper"
+  );
+};
+
+/**
  * ブロック要素の識別名を返す．`textType`（`"h1"`，`"paragraph"` 等）を `type` より優先する．
  */
 const blockLabel = (child: unknown): string => {
@@ -382,6 +426,101 @@ export const collectBoxes = (
     }
     throw new Error(
       "Invalid JSX structure: unexpected child in Flexbox. Expected Box elements.",
+    );
+  }
+
+  return result;
+};
+
+/**
+ * JSX の children を {@link EasyCell} の配列に変換する．
+ * {@link Tr} コンポーネントの children に使用する．
+ */
+export const collectEasyCells = (children: EasyRowChildren): EasyCell[] => {
+  const flat = flattenJsxChildren(children);
+  const result: EasyCell[] = [];
+
+  for (const child of flat) {
+    if (isIgnored(child)) {
+      continue;
+    }
+    if (isEasyCellWrapper(child)) {
+      result.push(child.cell);
+      continue;
+    }
+    throw new Error(
+      "Invalid JSX structure: unexpected child in Tr. Expected Td elements.",
+    );
+  }
+
+  return result;
+};
+
+/**
+ * JSX の children を {@link EasyCell} の 2 次元配列に変換する．
+ * {@link Easytable} コンポーネントの children に使用する．
+ */
+export const collectEasyRows = (children: EasytableChildren): EasyCell[][] => {
+  const flat = flattenJsxChildren(children);
+  const result: EasyCell[][] = [];
+
+  for (const child of flat) {
+    if (isIgnored(child)) {
+      continue;
+    }
+    if (isEasyRowWrapper(child)) {
+      result.push(child.cells);
+      continue;
+    }
+    throw new Error(
+      "Invalid JSX structure: unexpected child in Easytable. Expected Tr elements.",
+    );
+  }
+
+  return result;
+};
+
+/**
+ * JSX の children を {@link DescriptionItem} の配列に変換する．
+ * {@link Description} コンポーネントの children に使用する．
+ * `<Dt>` と `<Dd>` を交互に並べる必要がある．
+ */
+export const collectDescriptionItems = (
+  children: DescriptionChildren,
+): DescriptionItem[] => {
+  const flat = flattenJsxChildren(children);
+  const result: DescriptionItem[] = [];
+  let currentTerm: InlineOrExtender[] | null = null;
+
+  for (const child of flat) {
+    if (isIgnored(child)) {
+      continue;
+    }
+    if (isDescTermWrapper(child)) {
+      if (currentTerm !== null) {
+        throw new Error(
+          "Invalid JSX structure: Dt must be followed by Dd before the next Dt.",
+        );
+      }
+      currentTerm = child.term;
+      continue;
+    }
+    if (isDescBodyWrapper(child)) {
+      if (currentTerm === null) {
+        throw new Error("Invalid JSX structure: Dd must be preceded by a Dt.");
+      }
+      result.push({ term: currentTerm, body: child.body });
+      currentTerm = null;
+      continue;
+    }
+    throw new Error(
+      "Invalid JSX structure: unexpected child in Description. Expected Dt or Dd elements.",
+    );
+  }
+
+  if (currentTerm !== null) {
+    throw new Error(
+      "Invalid JSX structure: Dt at end of Description without a matching Dd.",
     );
   }
 
