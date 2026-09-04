@@ -7,6 +7,8 @@
 import type {
   Block,
   BlockExtender,
+  DescriptionItem,
+  EasyCell,
   Flow,
   Group,
   InlineOrExtender,
@@ -23,6 +25,13 @@ import {
 import type {
   BlockChildren,
   BodyChildren,
+  DescBodyWrapper,
+  DescriptionChildren,
+  DescTermWrapper,
+  EasyCellWrapper,
+  EasyRowChildren,
+  EasyRowWrapper,
+  EasytableChildren,
   GroupChildren,
   InlineChildren,
   LineBreak,
@@ -75,6 +84,14 @@ const inlineLabel = (child: unknown): string => {
 };
 
 /**
+ * JSX のソース整形による改行が空白文字に変換された場合に，
+ * CJK 文字間の不要な空白を除去する．欧文の単語間スペースは保持する．
+ */
+const removeCjkSpaces = (text: string): string => {
+  return text.replace(/(?<=[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]) +(?=[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF])/g, "");
+};
+
+/**
  * JSX の children を再帰的にフラット化して配列として返す．
  */
 const flattenJsxChildren = (children: unknown): unknown[] => {
@@ -110,7 +127,7 @@ export const collectInlineLines = (
       continue;
     }
     if (typeof child === "string") {
-      const parts = child.replace(/\r\n?/g, "\n").split("\n");
+      const parts = removeCjkSpaces(child).replace(/\r\n?/g, "\n").split("\n");
       lines.at(-1)!.push(parts[0]);
       for (let i = 1; i < parts.length; i++) {
         lines.push(parts[i] ? [parts[i]] : []);
