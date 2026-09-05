@@ -42,6 +42,7 @@ import type {
 // ------
 // 内部関数
 // ------
+
 /**
  * 値が {@link LineBreak} であるかを判定する．
  */
@@ -154,6 +155,7 @@ const flattenJsxChildren = (children: unknown): unknown[] => {
 // ------
 // 公開 API
 // ------
+
 /**
  * JSX の children をインライン要素の行配列（Lines 相当）に変換する．
  * 文字列中の \n を行区切りとして扱う．

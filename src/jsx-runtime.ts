@@ -18,6 +18,7 @@ import type {
 // ------
 // 型定義
 // ------
+
 /**
  * {@link Dt} コンポーネントが返す，説明リストの見出しのタグ付きラッパー型．
  * {@link collectDescriptionItems} がこの型を識別するために使用する．
@@ -208,6 +209,7 @@ export namespace JSX {
 // ------
 // JSX ランタイム
 // ------
+
 /**
  * JSX Fragment．複数の要素をラップせずにグループ化する．
  */
