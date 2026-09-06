@@ -36,9 +36,12 @@ yarn add @minitype/tsx
 ## 使い方
 
 `.tsx` ファイルに JSX を使って組版ドキュメントを記述します．
+
 `<Document>` をルート要素として，その中に `<Group>`（グループ）を配置します．
 グループの中にブロック要素を配置して，ブロック要素の中にインライン要素を配置します．
+
 最後に `minitypeJSX()` へ渡すことで PDF を出力します．
+`minitypeJSX` の第 2 引数（`MiniTypeOptions`）および返り値は通常の `minitype` 関数と同一です．
 
 詳細なコンポーネントについては [コンポーネント一覧](./docs/component.md) を，実際の使用例については [sample/index.tsx](./sample/index.tsx) を参照してください．
 
