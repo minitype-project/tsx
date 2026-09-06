@@ -1,13 +1,15 @@
 # @minitype/tsx
 
-[minitype](https://typeset.jp) の JSX/TSX サポートパッケージです．
-JSX 記法を用いた minitype の文書記述を実現するコンポーネント群および JSX ランタイムを提供します．
+[minitype](https://typeset.jp) の文書を JSX/TSX で記述するためのパッケージです．
+JSX ランタイムと，ブロック・インライン・標準プラグインに対応するコンポーネント群を提供します．
 
 **@minitype/tsx** is a JSX/TSX support package for [minitype](https://typeset.jp).
 It provides a set of components and a JSX runtime for writing typesetting documents in JSX syntax.
 
 - [コンポーネント一覧（ドキュメント，ブロック）](./docs/components/document-block.md)
 - [コンポーネント一覧（インライン）](./docs/components/inline.md)
+- [コンポーネント一覧（プラグイン／ブロック）](./docs/components/plugin-block.md)
+- [コンポーネント一覧（プラグイン／インライン）](./docs/components/plugin-inline.md)
 - [開発ガイド](./docs/development.md)
 
 ## セットアップ
