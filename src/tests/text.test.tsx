@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2026 Yuto Wada.
+ * Released under the MIT License.
+ * https://opensource.org/licenses/MIT
+ */
+
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
 import { B, Box, Br, Caption, H1, H4, Li1, P } from "../index.js";
