@@ -58,9 +58,27 @@ describe("<P>", () => {
     expect(result.lines).toEqual([["line1"], ["line2"]]);
   });
 
-  it("CJK 文字間の空白（JSX 改行由来）を除去する", () => {
+  it("CJK 文字間のスペースを保持する（意図的なスペース）", () => {
     const result = (<P>{"日本語 テキスト"}</P>) as minitype.Text;
-    expect(result.lines).toEqual([["日本語テキスト"]]);
+    expect(result.lines).toEqual([["日本語 テキスト"]]);
+  });
+
+  it("CJK 文字間の複数スペースをすべて保持する", () => {
+    const result = (
+      <P>{"筑波大学大学院 理工情報生命学術院 システム情報工学研究群"}</P>
+    ) as minitype.Text;
+    expect(result.lines).toEqual([
+      ["筑波大学大学院 理工情報生命学術院 システム情報工学研究群"],
+    ]);
+  });
+
+  it("直接記述した CJK 文字間の複数スペースをすべて保持する", () => {
+    const result = (
+      <P>筑波大学大学院 理工情報生命学術院 システム情報工学研究群</P>
+    ) as minitype.Text;
+    expect(result.lines).toEqual([
+      ["筑波大学大学院 理工情報生命学術院 システム情報工学研究群"],
+    ]);
   });
 
   it("欧文の単語間スペースは保持する", () => {
@@ -71,6 +89,36 @@ describe("<P>", () => {
   it("CJK と欧文の間のスペースは保持する", () => {
     const result = (<P>{"日本語 text"}</P>) as minitype.Text;
     expect(result.lines).toEqual([["日本語 text"]]);
+  });
+
+  it("テキストノードの先頭 CJK スペースを除去する", () => {
+    // <B>太字</B> 続きのテキスト → " 続きのテキスト" の先頭スペースが除去される
+    const result = (
+      <P>
+        <B>太字</B> 続きのテキスト
+      </P>
+    ) as minitype.Text;
+    expect(result.lines[0][1]).toBe("続きのテキスト");
+  });
+
+  it("テキストノードの末尾 CJK スペースを除去する", () => {
+    // テキスト <B>太字</B> → "テキスト " の末尾スペースが除去される
+    const result = (
+      <P>
+        テキスト <B>太字</B>
+      </P>
+    ) as minitype.Text;
+    expect(result.lines[0][0]).toBe("テキスト");
+  });
+
+  it("欧文の末尾スペースは除去しない", () => {
+    // "hello " <B>world</B> → 欧文後のスペースは保持される
+    const result = (
+      <P>
+        hello <B>world</B>
+      </P>
+    ) as minitype.Text;
+    expect(result.lines[0][0]).toBe("hello ");
   });
 
   it("ブロック要素を子に持つとエラーを投げる", () => {

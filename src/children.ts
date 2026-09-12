@@ -129,14 +129,15 @@ const inlineLabel = (child: unknown): string => {
 };
 
 /**
- * JSX のソース整形による改行が空白文字に変換された場合に，
- * CJK 文字間の不要な空白を除去する．欧文の単語間スペースは保持する．
+ * JSX のテキストノードの先頭および末尾に現れる CJK 隣接スペースを除去する．
+ * テキストノードが要素に隣接する場合，先頭・末尾にスペースが生成されることがある．
+ * 欧文の単語間スペースは保持する．
  */
-const removeCjkSpaces = (text: string): string => {
-  return text.replace(
-    /(?<=[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]) +(?=[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF])/g,
-    "",
-  );
+const removeCjkBoundarySpaces = (text: string): string => {
+  const CJK = "[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]";
+  return text
+    .replace(new RegExp(`^ +(?=${CJK})`), "")
+    .replace(new RegExp(`(?<=${CJK}) +$`), "");
 };
 
 /**

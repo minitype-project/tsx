@@ -38,6 +38,7 @@ import {
   lstlisting,
   mdFile,
   mdString,
+  p,
   readBibtex,
   span,
   staticBibliography,
@@ -313,11 +314,13 @@ export interface TdProps {
  * children はインライン要素として扱われる．colspan を指定すると列を結合する．
  */
 export const Td = ({ children, colspan }: TdProps): EasyCellWrapper => {
-  const inlines = collectInlines(children);
+  const lines = collectInlineLines(children);
   const content: EasyCellContent =
-    inlines.length === 1 && typeof inlines[0] === "string"
-      ? inlines[0]
-      : inlines;
+    lines.length === 1
+      ? lines[0].length === 1 && typeof lines[0][0] === "string"
+        ? lines[0][0]
+        : lines[0]
+      : p(lines, { firstIndent: 0 });
   const cell: EasyCell =
     colspan !== undefined ? span(content, colspan) : content;
   return { type: "easyCellWrapper", cell };
