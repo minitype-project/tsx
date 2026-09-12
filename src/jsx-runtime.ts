@@ -90,6 +90,7 @@ export type JsxElement =
   | DescBodyWrapper
   | EasyCellWrapper
   | EasyRowWrapper
+  | (() => JsxElement)
   | JsxElement[]
   | null
   | undefined;
@@ -225,23 +226,47 @@ type JsxFactory = {
     props: Record<string, unknown>,
     _key?: string,
   ): T;
-  (type: symbol, props: Record<string, unknown>, _key?: string): JsxElement;
+  (
+    type: JsxElement[] | symbol,
+    props: Record<string, unknown>,
+    _key?: string,
+  ): JsxElement;
+};
+
+/**
+ * JSX の children を再帰的にフラット化して {@link JsxElement} の配列として返す．
+ * 配列は再帰的に展開し，関数は引数なしで呼び出してその結果をフラット化する．
+ * `null`，`undefined`，`true`，`false` は無視する．
+ */
+const flattenChildren = (children: unknown): JsxElement[] => {
+  if (children == null || children === true || children === false) {
+    return [];
+  }
+  if (typeof children === "function") {
+    return flattenChildren((children as () => JsxElement)());
+  }
+  if (Array.isArray(children)) {
+    return children.flatMap((child) => flattenChildren(child));
+  }
+  return [children as JsxElement];
 };
 
 /**
  * JSX ファクトリ関数（automatic transform 用）．
  */
 export const jsx: JsxFactory = (
-  type: ((props: Record<string, unknown>) => JsxElement) | symbol,
+  type:
+    | ((props: Record<string, unknown>) => JsxElement)
+    | JsxElement[]
+    | symbol,
   props: Record<string, unknown>,
   _key?: string,
 ): JsxElement => {
   if (type === Fragment) {
-    const children = props.children;
-    if (Array.isArray(children)) {
-      return children as JsxElement[];
-    }
-    return children as JsxElement;
+    return flattenChildren(props.children);
+  }
+  if (Array.isArray(type)) {
+    return flattenChildren(type);
   }
   if (typeof type === "function") {
     return type(props);
