@@ -1,6 +1,6 @@
 {
   "name": "@minitype/tsx",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "JSX/TSX support for minitype",
   "author": "Yuto Wada",
   "license": "MIT",
