@@ -72,7 +72,7 @@ const SampleImage = () => Image({ src: "figure.png", style: { width: 80 } });
 // 組版処理
 // ------
 
-const blocks = await evaluateMdxFile(
+const result = await evaluateMdxFile(
   new URL("content.mdx", import.meta.url).pathname,
   {
     components: {
@@ -131,7 +131,7 @@ const document = (
       ],
     }}
   >
-    <Group>{blocks}</Group>
+    <Group>{result.blocks}</Group>
   </Document>
 );
 
