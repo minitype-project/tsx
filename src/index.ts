@@ -11,5 +11,6 @@ export * from "./components/inline-control.js";
 export * from "./components/plugin-block.js";
 export * from "./components/plugin-inline.js";
 export * from "./components/text.js";
-export type { JsxElement } from "./jsx-runtime.js";
+export type { InlineChildren, JsxElement } from "./jsx-runtime.js";
+export * from "./mdx.js";
 export * from "./typeset.js";

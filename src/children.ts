@@ -177,10 +177,26 @@ export const collectInlineLines = (
       continue;
     }
     if (typeof child === "string") {
-      const parts = removeCjkSpaces(child).replace(/\r\n?/g, "\n").split("\n");
-      lines.at(-1)!.push(parts[0]);
-      for (let i = 1; i < parts.length; i++) {
-        lines.push(parts[i] ? [parts[i]] : []);
+      const parts = removeCjkBoundarySpaces(child)
+        .replace(/\r\n?/g, "\n")
+        .split("\n");
+
+      // \n から始まる文字列を split すると parts[0] が空文字になる．
+      // lines の末尾が空行（LineBreak 挿入済み）のとき，この parts[0] を読み飛ばして改行の二重化を防ぐ
+      if (parts[0] === "" && lines.at(-1)!.length === 0 && parts.length > 1) {
+        if (parts[1]) {
+          lines.at(-1)!.push(parts[1]);
+        }
+        for (let i = 2; i < parts.length; i++) {
+          lines.push(parts[i] ? [parts[i]] : []);
+        }
+      } else {
+        if (parts[0]) {
+          lines.at(-1)!.push(parts[0]);
+        }
+        for (let i = 1; i < parts.length; i++) {
+          lines.push(parts[i] ? [parts[i]] : []);
+        }
       }
       continue;
     }
