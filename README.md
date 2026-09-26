@@ -1,10 +1,10 @@
 # @minitype/tsx
 
-[minitype](https://typeset.jp) の文書を JSX/TSX で記述するためのパッケージです．
-JSX ランタイムと，ブロック・インライン・標準プラグインに対応するコンポーネント群を提供します．
+[minitype](https://typeset.jp) の文書を JSX/TSX または Markdown + JSX/TSX（MDX）で記述するためのパッケージです．
+JSX/MDX ランタイムと，ブロック・インライン・標準プラグインに対応するコンポーネント群を提供します．
 
-**@minitype/tsx** is a JSX/TSX support package for [minitype](https://typeset.jp).
-It provides a set of components and a JSX runtime for writing typesetting documents in JSX syntax.
+**@minitype/tsx** is a JSX/TSX and Markdown + JSX/TSX (MDX) support package for [minitype](https://typeset.jp).
+It provides a set of components and a JSX/MDX runtime for writing typesetting documents in JSX/MDX syntax.
 
 - [コンポーネント一覧（ドキュメント，ブロック）](./docs/components/document-block.md)
 - [コンポーネント一覧（インライン）](./docs/components/inline.md)
@@ -35,9 +35,9 @@ yarn add @minitype/tsx
 }
 ```
 
-## 使い方
+## JSX での文書記述
 
-`.tsx` ファイルに JSX を使って組版ドキュメントを記述します．
+`.tsx` ファイルに JSX を使用して文書を記述します．
 
 `<Document>` をルート要素として，その中に `<Group>`（グループ）を配置します．
 グループの中にブロック要素を配置して，ブロック要素の中にインライン要素を配置します．
@@ -45,7 +45,7 @@ yarn add @minitype/tsx
 最後に `minitypeJSX()` へ渡すことで PDF を出力します．
 `minitypeJSX` の第 2 引数（`MiniTypeOptions`）および返り値は通常の `minitype` 関数と同一です．
 
-詳細なコンポーネントについては [コンポーネント一覧](./docs/component.md) を，実際の使用例については [sample/index.tsx](./sample/index.tsx) を参照してください．
+詳細なコンポーネントについては [コンポーネントに関するドキュメント](./docs/components/) を，実際の使用例については [sample/index.tsx](./sample/index.tsx) を参照してください．
 
 ```tsx
 import { cmyk } from "@minitype/minitype";
@@ -102,6 +102,47 @@ const document = (
 
 await minitypeJSX(document, { fontDir: "./fonts" }).save("output.pdf");
 ```
+
+## MDX での記述
+
+`.mdx` ファイルに Markdown と JSX を混在させて文書を記述することもできます．
+`evaluateMdxFile()`（ファイルパスから読み込む場合）または `evaluateMdxString()`（文字列から評価する場合）を用いて MDX を評価して，返り値の `blocks` を `<Group>` 内に配置します．
+
+以下の Markdown 記法に対応しています．
+
+- 見出し（`#`–`####`）
+- 段落，太字，斜体，取り消し線，リンク
+- リスト（順序なし／順序付き），コードブロック，テーブル，引用
+- 画像：`![alt](path)` の形式で記述します．`alt` を指定するとキャプション付きの図として出力されます．`path` の末尾に`?ratio=0.5` のようなクエリパラメータを付与した場合，全体幅に対する表示幅の比率を指定できます（既定値：`1.0`）．
+  - （例：`![図 1](figure.png?ratio=0.5)`）
+- 数式（インライン：`$E = mc^2$`，ブロック：`$$E = mc^2$$`）
+- 脚注，YAML フロントマター
+
+MDX ファイル内では，デフォルトコンポーネントに加えて `<Ruby>`，`<Color>` 等の minitype-tsx コンポーネントを JSX タグとして直接使用できます．
+カスタムコンポーネントを追加したい場合は，`components` オプションに渡します．
+
+```ts
+import { evaluateMdxFile, Document, Group, minitypeJSX } from "@minitype/tsx";
+
+const result = await evaluateMdxFile("content.mdx", {
+  components: {
+    // カスタムコンポーネントを追加
+    MyComponent: (props) => /* ... */,
+  },
+});
+
+// result.frontmatter には YAML フロントマターの内容が入る
+// result.blocks を <Group> に渡す
+const document = (
+  <Document style={{ size: "A4", writingMode: "horizontal" }}>
+    <Group>{result.blocks}</Group>
+  </Document>
+);
+
+await minitypeJSX(document, { fontDir: "./fonts" }).save("output.pdf");
+```
+
+実際の使用例は [sample/mdx.tsx](./sample/mdx.tsx) および [sample/content.mdx](./sample/content.mdx) を参照してください．
 
 ## ライセンス・謝辞
 
