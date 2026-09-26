@@ -428,10 +428,10 @@
     unist-util-visit "^5.0.0"
     vfile "^6.0.0"
 
-"@minitype/minitype@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@minitype/minitype/-/minitype-0.1.6.tgz#e0c44fe0596567d1adfdb438972fc6a306efef3e"
-  integrity sha512-3RmGHENDQTVh5j2HEIoV82om6CIrb96LqkgOOHL75iW0KJbth9RnycIYljd6pHSqEA/CPrmKRD08K8HKx3ia7g==
+"@minitype/minitype@^0.1.7":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@minitype/minitype/-/minitype-0.1.7.tgz#a492038b66f0a6ce9a4382d1ac9895bc4e1c725c"
+  integrity sha512-pEbdAQySkXdwAXHxG++jMXLg8wDh6m2+87ssAKIdNwYLVe0aFbiN+70G2wSbVko7uVH22RWgfyln8Xv9xcz5XA==
   dependencies:
     "@citation-js/core" "^0.7.21"
     "@citation-js/plugin-bibtex" "^0.7.21"
