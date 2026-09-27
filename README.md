@@ -10,6 +10,7 @@ It provides a set of components and a JSX/MDX runtime for writing typesetting do
 - [コンポーネント一覧（インライン）](./docs/components/inline.md)
 - [コンポーネント一覧（プラグイン／ブロック）](./docs/components/plugin-block.md)
 - [コンポーネント一覧（プラグイン／インライン）](./docs/components/plugin-inline.md)
+- [Markdown における改行](./docs/md-line-break.md)
 - [開発ガイド](./docs/development.md)
 
 ## セットアップ
@@ -109,6 +110,7 @@ await minitypeJSX(document, { fontDir: "./fonts" }).save("output.pdf");
 `evaluateMdxFile()`（ファイルパスから読み込む場合）または `evaluateMdxString()`（文字列から評価する場合）を用いて MDX を評価して，返り値の `blocks` を `<Group>` 内に配置します．
 
 以下の Markdown 記法に対応しています．
+改行の扱いに関しては [Markdown における改行](./docs/md-line-break.md) を参照してください．
 
 - 見出し（`#`–`####`）
 - 段落，太字，斜体，取り消し線，リンク
