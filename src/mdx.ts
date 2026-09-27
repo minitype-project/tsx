@@ -160,6 +160,15 @@ export interface MdxResult {
 type MdxLiWrapper = { readonly _type: "mdxLi"; children: InlineChildren };
 
 /**
+ * {@link mdxUl}，{@link mdxOl} が返す，リストアイテム列のタグ付きラッパー型．
+ * {@link evaluateMdxString} 内の {@link resolveListBlocks} がこの型を識別して `gapRole="list"` の {@link Box} に変換する．
+ */
+type ListBlock = {
+  readonly _type: "listBlock";
+  items: minitype.Block[];
+};
+
+/**
  * {@link mdxCode} がブロックコンテキストで返す，コードブロックのタグ付きラッパー型．
  * {@link mdxPre} がこの型を識別して {@link Code} に変換する．
  */
@@ -173,6 +182,48 @@ type MdxCodeWrapper = {
 // ------
 // remark プラグイン
 // ------
+
+/**
+ * loose なリスト（項目間に空行があるもの）を，項目ごとに独立したリストに分割するプラグイン．
+ * CommonMark では空行区切りで区切られたリスト群を，別々の Box として扱う．
+ */
+const remarkSplitLooseList = () => {
+  type RemarkNode = {
+    type?: string;
+    ordered?: boolean;
+    spread?: boolean;
+    start?: number;
+    children?: RemarkNode[];
+  };
+
+  return (tree: { children?: RemarkNode[] }) => {
+    const walk = (parent: { children?: RemarkNode[] }) => {
+      if (!parent.children) {
+        return;
+      }
+      const newChildren: RemarkNode[] = [];
+      for (const child of parent.children) {
+        if (child.type === "list" && child.spread && child.children) {
+          for (const item of child.children) {
+            walk(item);
+            newChildren.push({
+              type: "list",
+              ordered: child.ordered,
+              start: 1,
+              spread: false,
+              children: [item],
+            });
+          }
+        } else {
+          walk(child);
+          newChildren.push(child);
+        }
+      }
+      parent.children = newChildren;
+    };
+    walk(tree);
+  };
+};
 
 /**
  * コードフェンスの `meta`（info string のスペース以降の部分）を `lang` に `\x01` で結合して保持するプラグイン．
@@ -262,6 +313,78 @@ const isMdxFootnote = (value: unknown): value is minitype.Footnote => {
   );
 };
 
+/**
+ * `value` が {@link minitype.List} かどうかを判定する．
+ */
+const isListObj = (c: unknown): c is minitype.List =>
+  typeof c === "object" &&
+  c !== null &&
+  (c as { type?: unknown }).type === "list";
+
+/**
+ * `value` が {@link ListBlock} かどうかを判定する．
+ */
+const isListBlock = (c: unknown): c is ListBlock =>
+  typeof c === "object" &&
+  c !== null &&
+  (c as { _type?: unknown })._type === "listBlock";
+
+/**
+ * `<li>` の children から {@link ListBlock} ラッパーを展開して，フラットな配列を返す．
+ *
+ * @param children - `<li>` の children（インラインまたは `listBlock` の混在配列）
+ * @returns インライン要素と {@link minitype.List} のフラットな配列
+ */
+const expandLiChildren = (
+  children: InlineChildren,
+): (minitype.Inline | minitype.List)[] => {
+  // MDX のネストされた `<ul>`，`<ol>` は `<li>` の children に {@link ListBlock} として格納されている
+  const raw = Array.isArray(children)
+    ? (children as unknown[]).flat()
+    : [children];
+  return raw.flatMap((c) => (isListBlock(c) ? c.items : [c])) as (
+    | minitype.Inline
+    | minitype.List
+  )[];
+};
+
+/**
+ * `<li>` の children をインライン要素とネストリストに分離して，{@link makeListItem} でインライン部分をブロック化して返す．
+ *
+ * @param item - {@link MdxLiWrapper} または非 `<Li>` の unknown 値．
+ * @param makeListItem - {@link InlineChildren} からブロックを生成する関数．
+ * リストのレベルは後に上書きされるため，{@link Li1} または {@link Ol1} を渡せば良い．
+ * @returns 変換後の {@link minitype.Block} の配列．
+ */
+const convertLiItem = (
+  item: unknown,
+  makeListItem: (children: InlineChildren) => minitype.Block,
+): minitype.Block[] => {
+  // <li> 以外（テキストノード等）はそのまま返す
+  if (!isMdxLi(item)) {
+    return [item as minitype.Block];
+  }
+
+  // ListBlock ラッパーを展開して，インライン要素とネストリストを分離
+  const childArray = expandLiChildren(item.children);
+  const inlineChildren = childArray.filter((c) => !isListObj(c));
+  const nestedLists = childArray.filter(isListObj);
+  const result: minitype.Block[] = [];
+
+  // インライン部分をリストアイテムブロックに変換
+  if (inlineChildren.length > 0) {
+    result.push(makeListItem(inlineChildren as InlineChildren));
+  }
+  // ネストリストの level を 1 つ上げる（外側の <ul>/<ol> が処理されるたびに +1 される）
+  for (const nested of nestedLists) {
+    result.push({
+      ...nested,
+      level: Math.min(nested.level + 1, 3) as minitype.ListLevel,
+    });
+  }
+  return result;
+};
+
 // ------
 // コンポーネントマッピング
 // ------
@@ -310,29 +433,45 @@ const mdxLi = ({
 };
 
 /**
- * `<ul>` 要素の各 `<li>` を {@link Li1} に変換する．
+ * `<ul>` 要素の各 `<li>` を {@link Li1} に変換して {@link ListBlock} ラッパーで包む．
+ *
+ * ネストされた `<ul>`/`<ol>`（`<li>` の children に含まれる {@link ListBlock}）は
+ * {@link expandLiChildren} で展開したうえで `level` を 1 つインクリメントしてフラットに並べる．
  */
-const mdxUl = ({ children }: Record<string, unknown>): JsxElement => {
+const mdxUl = ({ children }: Record<string, unknown>): ListBlock => {
   const filtered = filterWhitespace(children);
   const items = Array.isArray(filtered) ? (filtered as unknown[]) : [filtered];
-  return items.map((item) =>
-    isMdxLi(item) ? Li1({ children: item.children }) : (item as JsxElement),
-  ) as JsxElement[];
+  const listItems = items.flatMap((item) =>
+    convertLiItem(item, (c) => Li1({ children: c })),
+  );
+  return { _type: "listBlock", items: listItems };
 };
 
 /**
- * `<ol>` 要素の各 `<li>` を {@link Ol1} に変換する．
- * 脚注リスト（{@link minitype.Footnote}）はそのままパススルーする．
+ * `<ol>` 要素の各 `<li>` を {@link Ol1}，{@link Ol2}，または {@link Ol3} に変換して {@link ListBlock} ラッパーで包む．
+ *
+ * 脚注リスト（remark-gfm が生成する `<li id="user-content-fn-*">`）は
+ * {@link minitype.Footnote} としてそのまま返す．
+ * ネストされた `<ul>`/`<ol>` は `level` を 1 つインクリメントしてフラットに並べる．
  */
-const mdxOl = ({ children }: Record<string, unknown>): JsxElement => {
+const mdxOl = ({
+  children,
+}: Record<string, unknown>): ListBlock | minitype.Footnote[] => {
   const filtered = filterWhitespace(children);
   const items = Array.isArray(filtered) ? (filtered as unknown[]) : [filtered];
-  return items.map((item) => {
-    if (isMdxFootnote(item)) return item as JsxElement;
-    return isMdxLi(item)
-      ? Ol1({ children: item.children })
-      : (item as JsxElement);
-  }) as JsxElement[];
+  const footnotes: minitype.Footnote[] = [];
+
+  const listItems = items.flatMap((item) => {
+    if (isMdxFootnote(item)) {
+      footnotes.push(item);
+      return [];
+    }
+    return convertLiItem(item, (c) => Ol1({ children: c }));
+  });
+
+  return listItems.length > 0
+    ? { _type: "listBlock", items: listItems }
+    : footnotes;
 };
 
 /**
@@ -685,6 +824,7 @@ export const evaluateMdxString = async (
     Fragment,
     development: false,
     remarkPlugins: [
+      remarkSplitLooseList,
       remarkPreserveCodeMeta,
       remarkGfm,
       remarkMath,
@@ -702,8 +842,35 @@ export const evaluateMdxString = async (
   )({
     components,
   });
+
+  /**
+   * ブロック配列を再帰的に走査して，{@link ListBlock} を `gapRole="list"` の {@link Box} に変換する．
+   *
+   * {@link mdxUl}，{@link mdxOl} は `<ul>`，`<ol>` ごとに 1 つの {@link ListBlock} を返す．
+   * 空行で区切られた複数のリストブロックがそれぞれ独立した {@link Box} になることで，
+   * list に対して gap を設定できるとともに，番号のリセットも `<ol>` ごとに行われるようになる．
+   *
+   * @param node - 走査対象のノード（ブロック，配列，または `null`）
+   * @returns {@link ListBlock} を {@link Box} に置換したノード
+   */
+  const resolveListBlocks = (node: unknown): unknown => {
+    if (node == null) {
+      return node;
+    }
+    if (Array.isArray(node)) {
+      return node.map(resolveListBlocks);
+    }
+    if (isListBlock(node)) {
+      return Box({
+        children: node.items as unknown as BlockChildren,
+        style: { gapRole: "list", splitable: true },
+      });
+    }
+    return node;
+  };
+
   return {
-    blocks: filterWhitespace(blocks),
+    blocks: resolveListBlocks(filterWhitespace(blocks)) as JsxElement,
     frontmatter: frontmatter ?? {},
   };
 };
