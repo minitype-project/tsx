@@ -6,10 +6,6 @@
 
 import type { InlineChildren } from "./jsx-runtime.js";
 
-// ------
-// ソフト改行の正規化
-// ------
-
 /**
  * 文字が和文かどうかを判定する．
  * 和文：CJK 統合漢字，ひらがな，カタカナ，全角文字（U+3000–U+9FFF，U+F900–U+FAFF，U+FF00–U+FFEF）

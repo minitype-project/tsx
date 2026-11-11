@@ -13,4 +13,5 @@ export * from "./components/plugin-inline.js";
 export * from "./components/text.js";
 export type { InlineChildren, JsxElement } from "./jsx-runtime.js";
 export * from "./mdx.js";
+export { filterWhitespace } from "./mdx-components.js";
 export * from "./typeset.js";

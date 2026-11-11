@@ -143,8 +143,9 @@ type SplitLooseListNode = {
 
 type PreserveCodeMetaNode = {
   type?: string;
-  lang?: string;
+  lang?: string | null;
   meta?: string | null;
+  data?: { hProperties?: Record<string, unknown> };
   children?: unknown[];
 };
 
@@ -183,14 +184,25 @@ export const remarkSplitLooseList = () => {
 };
 
 /**
- * コードフェンスの `meta`（info string のスペース以降の部分）を `lang` に `\x01` で結合して保持するプラグイン．
- * remark が MDX にコンパイルする際に meta が消えるため，lang に埋め込んで保持する．
+ * コードフェンスの `meta`（info string のスペース以降の部分）を `<code>` の `data-meta` 属性として保持するプラグイン．
+ * remark が MDX にコンパイルする際に meta が消えるため，hast のプロパティに移して保持する．
+ * `class` 属性と異なり空白で分割されないため，空白を含む meta もそのまま渡る．
+ * また，`ts:キャプション` のように `lang` がコロンを含む場合は，コロン以降を meta の先頭に移す．
  */
 export const remarkPreserveCodeMeta = () => {
   return (tree: { children?: unknown[] }) => {
     const walk = (node: PreserveCodeMetaNode) => {
+      const colonIndex = node.lang?.indexOf(":") ?? -1;
+      if (node.type === "code" && node.lang && colonIndex >= 0) {
+        const langMeta = node.lang.slice(colonIndex + 1);
+        node.lang = node.lang.slice(0, colonIndex);
+        node.meta = [langMeta, node.meta].filter(Boolean).join(" ");
+      }
       if (node.type === "code" && node.meta) {
-        node.lang = `${node.lang ?? ""}\x01${node.meta}`;
+        node.data = {
+          ...node.data,
+          hProperties: { ...node.data?.hProperties, "data-meta": node.meta },
+        };
         node.meta = null;
       }
       if (node.children) {
@@ -250,6 +262,18 @@ export const filterWhitespace = (children: unknown): JsxElement => {
     ) as JsxElement[];
   }
   return children as JsxElement;
+};
+
+/**
+ * `src` をパスとクエリ（`?` 以降，`?` を含む）に分割する．
+ */
+export const splitSrcQuery = (
+  src: string,
+): { pathname: string; search: string } => {
+  const queryIndex = src.indexOf("?");
+  return queryIndex < 0
+    ? { pathname: src, search: "" }
+    : { pathname: src.slice(0, queryIndex), search: src.slice(queryIndex) };
 };
 
 /**
@@ -340,22 +364,18 @@ const convertLiItem = (
 // ------
 
 /**
- * `<p>` などブロック要素の inline children を平坦化して取り出す．
+ * `<p>` などブロック要素の inline children を行区切りを保持して取り出す．
  * MDX の "loose list" や footnote で `<li><p>text</p></li>` 構造になるケースに対応する．
  */
 const extractInlineFromBlock = (children: JsxElement): JsxElement => {
+  if (Array.isArray(children)) {
+    return children.flatMap((child) => extractInlineFromBlock(child));
+  }
   const asText = children as minitype.Text;
   if (asText?.type === "text") {
-    return asText.lines.flat() as unknown as JsxElement;
-  }
-  if (Array.isArray(children)) {
-    return children.flatMap((child) => {
-      const asTextChild = child as minitype.Text;
-      if (asTextChild?.type === "text") {
-        return asTextChild.lines.flat();
-      }
-      return [child];
-    }) as JsxElement;
+    return asText.lines.flatMap((line, index) =>
+      index === 0 ? line : [Br(), ...line],
+    ) as JsxElement;
   }
   return children;
 };
@@ -432,6 +452,7 @@ const mdxOl = ({
 const mdxCode = ({
   className,
   children,
+  "data-meta": dataMeta,
 }: Record<string, unknown>): JsxElement => {
   const childStr =
     typeof children === "string" ? children : String(children ?? "");
@@ -439,14 +460,12 @@ const mdxCode = ({
   if (typeof className === "string" && className.includes("math-inline")) {
     return InlineMath({ children: childStr }) as unknown as JsxElement;
   }
-  const rawLang =
+  const lang =
     typeof className === "string" && className.startsWith("language-")
       ? className.slice("language-".length)
       : undefined;
-  // remarkPreserveCodeMeta が meta を \x01 区切りで lang に埋め込む
-  const sepIdx = rawLang?.indexOf("\x01") ?? -1;
-  const lang = sepIdx >= 0 ? rawLang!.slice(0, sepIdx) : rawLang;
-  const meta = sepIdx >= 0 ? rawLang!.slice(sepIdx + 1) : undefined;
+  // remarkPreserveCodeMeta が meta を data-meta 属性として渡す
+  const meta = typeof dataMeta === "string" ? dataMeta : undefined;
   // インラインコード（className なし）は直接 Command に変換する．
   // ブロックコード（className="language-*"）は MdxCodeWrapper を返して mdxPre に処理させる．
   if (lang === undefined) {
@@ -545,9 +564,8 @@ const mdxHr = (): minitype.Vspace => {
  */
 const mdxImg = ({ src, alt }: Record<string, unknown>): JsxElement => {
   const srcStr = typeof src === "string" ? src : "";
-  const qIdx = srcStr.indexOf("?");
-  const cleanSrc = qIdx >= 0 ? srcStr.slice(0, qIdx) : srcStr;
-  const params = new URLSearchParams(qIdx >= 0 ? srcStr.slice(qIdx + 1) : "");
+  const { pathname: cleanSrc, search } = splitSrcQuery(srcStr);
+  const params = new URLSearchParams(search);
   const parsedRatio = parseFloat(params.get("ratio") ?? "");
   const ratioValue = Number.isFinite(parsedRatio) ? parsedRatio : 1.0;
   const caption = typeof alt === "string" && alt.length > 0 ? alt : undefined;
