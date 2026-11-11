@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { B, Box, Flexbox, P, Section } from "../index.js";
+import { B, Box, Flexbox, P, Section } from "../../index.js";
 
 describe("<Box>", () => {
   it("ブロック要素を blocks に収集する", () => {

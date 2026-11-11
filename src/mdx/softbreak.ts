@@ -4,7 +4,7 @@
  * https://opensource.org/licenses/MIT
  */
 
-import type { InlineChildren } from "./jsx-runtime.js";
+import type { InlineChildren } from "../jsx/jsx-runtime.js";
 
 /**
  * 文字が和文かどうかを判定する．

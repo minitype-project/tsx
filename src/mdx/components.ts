@@ -6,7 +6,6 @@
 
 import type * as minitype from "@minitype/minitype";
 import { isBlock, ratio } from "@minitype/minitype";
-import { collectInlineSegments } from "./children.js";
 import {
   Addvspace,
   Autoref,
@@ -89,15 +88,16 @@ import {
   U,
   Url,
   Vspace,
-} from "./index.js";
+} from "../index.js";
+import { collectInlineSegments } from "../jsx/children.js";
 import type {
   BlockChildren,
   EasyRowChildren,
   EasytableChildren,
   InlineChildren,
   JsxElement,
-} from "./jsx-runtime.js";
-import { normalizeMdxSoftBreaks } from "./mdx-softbreak.js";
+} from "../jsx/jsx-runtime.js";
+import { normalizeMdxSoftBreaks } from "./softbreak.js";
 
 // ------
 // 型定義

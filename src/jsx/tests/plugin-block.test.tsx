@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { Dd, Description, Dt, Easytable, P, Td, Tr } from "../index.js";
+import { Dd, Description, Dt, Easytable, P, Td, Tr } from "../../index.js";
 
 describe("<Description>，<Dt>，<Dd>", () => {
   it("Dt + Dd のペアを収集する", () => {

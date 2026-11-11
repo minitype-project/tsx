@@ -7,7 +7,7 @@
 import type * as minitype from "@minitype/minitype";
 import { li1, li2, li3, ol1, ol2, ol3, p } from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { evaluateMdxString } from "../mdx.js";
+import { evaluateMdxString } from "../evaluate.js";
 
 const getBox = async (md: string): Promise<minitype.Box> => {
   const { blocks } = await evaluateMdxString(md);

@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { evaluateMdxString } from "../mdx.js";
+import { evaluateMdxString } from "../evaluate.js";
 
 const getP = async (
   md: string,

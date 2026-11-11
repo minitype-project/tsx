@@ -6,7 +6,7 @@
 
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
-import { evaluateMdxString } from "../mdx.js";
+import { evaluateMdxString } from "../evaluate.js";
 
 const baseUrl = pathToFileURL("/articles/foo/article.mdx");
 

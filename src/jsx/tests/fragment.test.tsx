@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { Group, H1, P } from "../index.js";
+import { Group, H1, P } from "../../index.js";
 
 describe("Fragment のネスト配列フラット化", () => {
   it("配列変数を {} で埋め込むとフラット化される", () => {

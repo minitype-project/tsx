@@ -5,8 +5,8 @@
  */
 
 import { expect, it } from "vitest";
-import type { JsxElement } from "../jsx-runtime.js";
-import { evaluateMdxString } from "../mdx.js";
+import type { JsxElement } from "../../jsx/jsx-runtime.js";
+import { evaluateMdxString } from "../evaluate.js";
 
 /**
  * コードフェンスを評価して，`pre` に渡される mdxCode オブジェクトを返す．

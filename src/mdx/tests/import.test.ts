@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { expect, it } from "vitest";
-import { evaluateMdxString } from "../mdx.js";
+import { evaluateMdxString } from "../evaluate.js";
 
 it("MDX のパッケージ import が記事の位置から解決される", async () => {
   const directory = await mkdtemp(path.join(tmpdir(), "minitype-mdx-"));

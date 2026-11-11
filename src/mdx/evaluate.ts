@@ -13,9 +13,9 @@ import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
-import type { JsxElement } from "./jsx-runtime.js";
-import { Fragment, jsx } from "./jsx-runtime.js";
-import { remarkCjkAutolink } from "./mdx-autolink.js";
+import type { JsxElement } from "../jsx/jsx-runtime.js";
+import { Fragment, jsx } from "../jsx/jsx-runtime.js";
+import { remarkCjkAutolink } from "./autolink.js";
 import {
   defaultComponents,
   filterWhitespace,
@@ -23,7 +23,7 @@ import {
   remarkSplitLooseList,
   resolveListBlocks,
   splitSrcQuery,
-} from "./mdx-components.js";
+} from "./components.js";
 
 // ------
 // 定数

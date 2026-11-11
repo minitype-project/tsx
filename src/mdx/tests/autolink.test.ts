@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { evaluateMdxString } from "../mdx.js";
+import { evaluateMdxString } from "../evaluate.js";
 
 /**
  * ブロックやインライン要素に含まれる文字列を，出現順に連結して返す．

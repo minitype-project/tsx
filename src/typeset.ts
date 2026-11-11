@@ -5,7 +5,7 @@
  */
 
 import { type MiniTypeOptions, minitype } from "@minitype/minitype";
-import type { DocumentResult, JsxElement } from "./jsx-runtime.js";
+import type { DocumentResult, JsxElement } from "./jsx/jsx-runtime.js";
 
 /**
  * JSX で記述したドキュメントを組版する．
