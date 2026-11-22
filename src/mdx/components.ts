@@ -6,8 +6,8 @@
 
 import type * as minitype from "@minitype/minitype";
 import { isBlock, ratio } from "@minitype/minitype";
-import { collectInlineSegments } from "./children.js";
 import {
+  Addkern,
   Addvspace,
   Autoref,
   B,
@@ -39,6 +39,7 @@ import {
   Hbox,
   HeadingInPage,
   Image,
+  IndentHere,
   InlineGraphic,
   InlineMath,
   Kenten,
@@ -61,6 +62,7 @@ import {
   NewColumn,
   NewPage,
   NoBreak,
+  NoBreakSpace,
   NoSplit,
   Num,
   Ol1,
@@ -81,6 +83,7 @@ import {
   StaticBibliographyFile,
   Sub,
   Sup,
+  Tcy,
   Td,
   Toc,
   TocIndex,
@@ -89,15 +92,17 @@ import {
   U,
   Url,
   Vspace,
-} from "./index.js";
+  Wbr,
+} from "../index.js";
+import { collectInlineSegments } from "../jsx/children.js";
 import type {
   BlockChildren,
   EasyRowChildren,
   EasytableChildren,
   InlineChildren,
   JsxElement,
-} from "./jsx-runtime.js";
-import { normalizeMdxSoftBreaks } from "./mdx-softbreak.js";
+} from "../jsx/jsx-runtime.js";
+import { normalizeMdxSoftBreaks } from "./softbreak.js";
 
 // ------
 // 型定義
@@ -121,8 +126,9 @@ export type ListBlock = {
 /**
  * {@link mdxCode} がブロックコンテキストで返す，コードブロックのタグ付きラッパー型．
  * {@link mdxPre} がこの型を識別して {@link Code} に変換する．
+ * `pre` を上書きする場合は，{@link isMdxCode} で `children` を判定して用いる．
  */
-type MdxCodeWrapper = {
+export type MdxCodeWrapper = {
   readonly _type: "mdxCode";
   lang?: string;
   meta?: string;
@@ -143,8 +149,9 @@ type SplitLooseListNode = {
 
 type PreserveCodeMetaNode = {
   type?: string;
-  lang?: string;
+  lang?: string | null;
   meta?: string | null;
+  data?: { hProperties?: Record<string, unknown> };
   children?: unknown[];
 };
 
@@ -161,12 +168,14 @@ export const remarkSplitLooseList = () => {
       const newChildren: SplitLooseListNode[] = [];
       for (const child of parent.children) {
         if (child.type === "list" && child.spread && child.children) {
-          for (const item of child.children) {
+          // 分割後も元のリストの番号が続くように，要素ごとに要素番号を設定
+          const start = child.start ?? 1;
+          for (const [index, item] of child.children.entries()) {
             walk(item);
             newChildren.push({
               type: "list",
               ordered: child.ordered,
-              start: 1,
+              start: start + index,
               spread: false,
               children: [item],
             });
@@ -183,14 +192,32 @@ export const remarkSplitLooseList = () => {
 };
 
 /**
- * コードフェンスの `meta`（info string のスペース以降の部分）を `lang` に `\x01` で結合して保持するプラグイン．
- * remark が MDX にコンパイルする際に meta が消えるため，lang に埋め込んで保持する．
+ * コードフェンスの `meta`（info string のスペース以降の部分）を `<code>` の `data-meta` 属性として保持するプラグイン．
+ * remark が MDX にコンパイルする際に meta が消えるため，hast のプロパティに移して保持する．
+ * `class` 属性と異なり空白で分割されないため，空白を含む meta もそのまま渡る．
+ * また，`ts:キャプション` のように `lang` がコロンを含む場合は，コロン以降を meta の先頭に移す．
+ *
+ * hast では `<code>` の `className` でしかコードブロックとインラインコードを区別できず，
+ * `lang` のないコードブロックがインラインコードと誤認されるため，`data-code-type="block"` を付与する．
  */
 export const remarkPreserveCodeMeta = () => {
   return (tree: { children?: unknown[] }) => {
     const walk = (node: PreserveCodeMetaNode) => {
-      if (node.type === "code" && node.meta) {
-        node.lang = `${node.lang ?? ""}\x01${node.meta}`;
+      if (node.type === "code") {
+        const colonIndex = node.lang?.indexOf(":") ?? -1;
+        if (node.lang && colonIndex >= 0) {
+          const langMeta = node.lang.slice(colonIndex + 1);
+          node.lang = node.lang.slice(0, colonIndex) || null;
+          node.meta = [langMeta, node.meta].filter(Boolean).join(" ");
+        }
+        node.data = {
+          ...node.data,
+          hProperties: {
+            ...node.data?.hProperties,
+            "data-code-type": "block",
+            ...(node.meta && { "data-meta": node.meta }),
+          },
+        };
         node.meta = null;
       }
       if (node.children) {
@@ -221,7 +248,7 @@ const isMdxLi = (value: unknown): value is MdxLiWrapper => {
 /**
  * `value` が {@link MdxCodeWrapper} かどうかを判定する．
  */
-const isMdxCode = (value: unknown): value is MdxCodeWrapper => {
+export const isMdxCode = (value: unknown): value is MdxCodeWrapper => {
   return (
     typeof value === "object" &&
     value !== null &&
@@ -250,6 +277,18 @@ export const filterWhitespace = (children: unknown): JsxElement => {
     ) as JsxElement[];
   }
   return children as JsxElement;
+};
+
+/**
+ * `src` をパスとクエリ（`?` 以降，`?` を含む）に分割する．
+ */
+export const splitSrcQuery = (
+  src: string,
+): { pathname: string; search: string } => {
+  const queryIndex = src.indexOf("?");
+  return queryIndex < 0
+    ? { pathname: src, search: "" }
+    : { pathname: src.slice(0, queryIndex), search: src.slice(queryIndex) };
 };
 
 /**
@@ -340,22 +379,18 @@ const convertLiItem = (
 // ------
 
 /**
- * `<p>` などブロック要素の inline children を平坦化して取り出す．
+ * `<p>` などブロック要素の inline children を行区切りを保持して取り出す．
  * MDX の "loose list" や footnote で `<li><p>text</p></li>` 構造になるケースに対応する．
  */
 const extractInlineFromBlock = (children: JsxElement): JsxElement => {
+  if (Array.isArray(children)) {
+    return children.flatMap((child) => extractInlineFromBlock(child));
+  }
   const asText = children as minitype.Text;
   if (asText?.type === "text") {
-    return asText.lines.flat() as unknown as JsxElement;
-  }
-  if (Array.isArray(children)) {
-    return children.flatMap((child) => {
-      const asTextChild = child as minitype.Text;
-      if (asTextChild?.type === "text") {
-        return asTextChild.lines.flat();
-      }
-      return [child];
-    }) as JsxElement;
+    return asText.lines.flatMap((line, index) =>
+      index === 0 ? line : [Br(), ...line],
+    ) as JsxElement;
   }
   return children;
 };
@@ -403,20 +438,29 @@ const mdxUl = ({ children }: Record<string, unknown>): ListBlock => {
  * 脚注リスト（remark-gfm が生成する `<li id="user-content-fn-*">`）は
  * {@link minitype.Footnote} としてそのまま返す．
  * ネストされた `<ul>`/`<ol>` は `level` を 1 つインクリメントしてフラットに並べる．
+ * `start` 属性（`3. item` のように 1 以外から始まるリスト）は，最初の要素の要素番号に設定する．
  */
 const mdxOl = ({
   children,
+  start,
 }: Record<string, unknown>): ListBlock | minitype.Footnote[] => {
   const filtered = filterWhitespace(children);
   const items = Array.isArray(filtered) ? (filtered as unknown[]) : [filtered];
   const footnotes: minitype.Footnote[] = [];
+  // MDX は `start` 属性を文字列として渡す
+  const startNumber =
+    typeof start === "string" && /^\d+$/.test(start)
+      ? Number.parseInt(start, 10)
+      : undefined;
 
-  const listItems = items.flatMap((item) => {
+  const listItems = items.flatMap((item, index) => {
     if (isMdxFootnote(item)) {
       footnotes.push(item);
       return [];
     }
-    return convertLiItem(item, (c) => Ol1({ children: c }));
+    return convertLiItem(item, (c) =>
+      Ol1({ children: c, start: index === 0 ? startNumber : undefined }),
+    );
   });
 
   return listItems.length > 0
@@ -432,6 +476,8 @@ const mdxOl = ({
 const mdxCode = ({
   className,
   children,
+  "data-code-type": dataCodeType,
+  "data-meta": dataMeta,
 }: Record<string, unknown>): JsxElement => {
   const childStr =
     typeof children === "string" ? children : String(children ?? "");
@@ -439,22 +485,22 @@ const mdxCode = ({
   if (typeof className === "string" && className.includes("math-inline")) {
     return InlineMath({ children: childStr }) as unknown as JsxElement;
   }
-  const rawLang =
+  const lang =
     typeof className === "string" && className.startsWith("language-")
       ? className.slice("language-".length)
       : undefined;
-  // remarkPreserveCodeMeta が meta を \x01 区切りで lang に埋め込む
-  const sepIdx = rawLang?.indexOf("\x01") ?? -1;
-  const lang = sepIdx >= 0 ? rawLang!.slice(0, sepIdx) : rawLang;
-  const meta = sepIdx >= 0 ? rawLang!.slice(sepIdx + 1) : undefined;
-  // インラインコード（className なし）は直接 Command に変換する．
-  // ブロックコード（className="language-*"）は MdxCodeWrapper を返して mdxPre に処理させる．
-  if (lang === undefined) {
+  // remarkPreserveCodeMeta が meta を data-meta 属性として渡す
+  const meta = typeof dataMeta === "string" ? dataMeta : undefined;
+  // コードブロック（remarkPreserveCodeMeta が data-code-type="block" を付与）と
+  // remark-math の数式ブロック（className="language-math math-display"）は
+  // MdxCodeWrapper を返して mdxPre に処理させる．
+  // それ以外はインラインコードとして Command に変換する．
+  if (dataCodeType !== "block" && lang === undefined) {
     return Command({ children: childStr, name: "c" });
   }
   return {
     _type: "mdxCode",
-    lang,
+    ...(lang !== undefined && { lang }),
     ...(meta !== undefined && { meta }),
     content: childStr,
   } as unknown as JsxElement;
@@ -545,9 +591,8 @@ const mdxHr = (): minitype.Vspace => {
  */
 const mdxImg = ({ src, alt }: Record<string, unknown>): JsxElement => {
   const srcStr = typeof src === "string" ? src : "";
-  const qIdx = srcStr.indexOf("?");
-  const cleanSrc = qIdx >= 0 ? srcStr.slice(0, qIdx) : srcStr;
-  const params = new URLSearchParams(qIdx >= 0 ? srcStr.slice(qIdx + 1) : "");
+  const { pathname: cleanSrc, search } = splitSrcQuery(srcStr);
+  const params = new URLSearchParams(search);
   const parsedRatio = parseFloat(params.get("ratio") ?? "");
   const ratioValue = Number.isFinite(parsedRatio) ? parsedRatio : 1.0;
   const caption = typeof alt === "string" && alt.length > 0 ? alt : undefined;
@@ -690,6 +735,7 @@ export const defaultComponents = {
   StaticBibliographyFile,
   // インライン
   U,
+  Tcy,
   Overline,
   Color,
   FontSize,
@@ -703,9 +749,13 @@ export const defaultComponents = {
   br: Br,
   Br,
   Fbr,
+  Wbr,
   Kern,
+  Addkern,
   NoBreak,
+  NoBreakSpace,
   NoSplit,
+  IndentHere,
   Cid,
   // 参照・ページ番号
   Ref,

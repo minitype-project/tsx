@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { evaluateMdxString } from "../mdx.js";
+import { evaluateMdxString } from "../evaluate.js";
 
 const getP = async (
   md: string,
@@ -135,5 +135,38 @@ describe("空行による段落区切り", () => {
       ["first", " ", "paragraph"],
     ]);
     expect((result[1] as minitype.Text).lines).toEqual([["next paragraph"]]);
+  });
+});
+
+describe("脚注内の改行", () => {
+  // 行末の 2 スペースおよびバックスラッシュは，Markdown の強制改行（hard break）の記法．
+  // 改行後の 4 スペースは脚注の継続行のインデント．
+  it.each(["  \n    ", "\\\n    ", "<br />", "<Br />"])(
+    "%j による改行を保持する",
+    async (separator) => {
+      const { blocks } = await evaluateMdxString(
+        `本文[^note]\n\n[^note]: first${separator}second`,
+      );
+      const footnote = (blocks as minitype.Block[])
+        .flat(Infinity)
+        .find((block) => block.type === "footnote") as minitype.Footnote;
+
+      expect(footnote).toBeDefined();
+      expect(
+        footnote.lines.map((line) =>
+          line
+            .filter((inline) => typeof inline === "string")
+            .join("")
+            .trim(),
+        ),
+      ).toEqual(["first", "second"]);
+    },
+  );
+});
+
+describe("ソフト改行（サロゲートペア）", () => {
+  it("CJK 統合漢字拡張 B の文字を和文として扱う", async () => {
+    expect((await getP("𠮟\n和文")).lines).toEqual([["𠮟", "和文"]]);
+    expect((await getP("和文\n𠮟")).lines).toEqual([["和文", "𠮟"]]);
   });
 });

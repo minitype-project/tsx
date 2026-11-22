@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { B, Document, Flow, Group, P } from "../index.js";
+import { B, Document, Flow, Group, P } from "../../index.js";
 import type { DocumentResult } from "../jsx-runtime.js";
 
 describe("<Group>，<Document>", () => {

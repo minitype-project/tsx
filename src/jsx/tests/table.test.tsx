@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { Cell, LstInputlisting, P, Row, Table } from "../index.js";
+import { Cell, LstInputlisting, P, Row, Table } from "../../index.js";
 
 describe("<Table>，<Row>，<Cell>", () => {
   it("テーブル構造全体を生成する", () => {

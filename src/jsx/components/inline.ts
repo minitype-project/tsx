@@ -74,6 +74,13 @@ export const U = makeInlineCommand("u");
 export const Del = makeInlineCommand("del");
 
 /**
+ * 縦中横．
+ * 縦組において，文字の種類や文字数によらず，内容をまとめて縦中横にする．横組では通常の文字として組む．
+ * スタイルは `documentStyle.command.tcy` で設定する．
+ */
+export const Tcy = makeInlineCommand("tcy");
+
+/**
  * {@link Color} コンポーネントの Props．
  */
 export interface ColorProps {

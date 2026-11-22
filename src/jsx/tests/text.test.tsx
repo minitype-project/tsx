@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { B, Box, Br, Caption, H1, H4, Li1, P } from "../index.js";
+import { B, Box, Br, Caption, H1, H4, Li1, P } from "../../index.js";
 
 describe("<P>", () => {
   it("テキストを段落に変換する", () => {

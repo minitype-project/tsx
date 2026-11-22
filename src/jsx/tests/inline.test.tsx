@@ -6,7 +6,7 @@
 
 import type * as minitype from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { B, Br, Del, Sub, Sup, U } from "../index.js";
+import { B, Br, Del, Sub, Sup, U } from "../../index.js";
 import type { LineBreak } from "../jsx-runtime.js";
 
 describe("インライン装飾", () => {

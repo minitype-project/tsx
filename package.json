@@ -1,6 +1,6 @@
 {
   "name": "@minitype/tsx",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "JSX/TSX support for minitype",
   "author": "Yuto Wada",
   "license": "MIT",
@@ -31,14 +31,14 @@
       "default": "./dist/index.js"
     },
     "./jsx-runtime": {
-      "types": "./dist/jsx-runtime.d.ts",
-      "import": "./dist/jsx-runtime.js",
-      "default": "./dist/jsx-runtime.js"
+      "types": "./dist/jsx/jsx-runtime.d.ts",
+      "import": "./dist/jsx/jsx-runtime.js",
+      "default": "./dist/jsx/jsx-runtime.js"
     },
     "./jsx-dev-runtime": {
-      "types": "./dist/jsx-dev-runtime.d.ts",
-      "import": "./dist/jsx-dev-runtime.js",
-      "default": "./dist/jsx-dev-runtime.js"
+      "types": "./dist/jsx/jsx-dev-runtime.d.ts",
+      "import": "./dist/jsx/jsx-dev-runtime.js",
+      "default": "./dist/jsx/jsx-dev-runtime.js"
     }
   },
   "files": [
@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.1.1",
-    "@minitype/minitype": "^0.1.7",
+    "@minitype/minitype": "^0.2.0",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",

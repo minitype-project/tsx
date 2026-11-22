@@ -1,6 +1,6 @@
 /**
  * TSDoc から markdown の Props テーブルを自動生成するスクリプト．
- * `src/components/` 内の `*Props` インターフェースを正本として，
+ * `src/jsx/components/` 内の `*Props` インターフェースを正本として，
  * `docs/components/*.md` の対応するテーブルを上書きする．
  *
  * 使用方法：yarn docs
@@ -47,7 +47,7 @@ interface InterfaceInfo {
 
 /**
  * 型名をキー，プロパティ一覧を値とするレジストリ．
- * エイリアス解決のために `src/components/` 外のソースも含む．
+ * エイリアス解決のために `src/jsx/components/` 外のソースも含む．
  */
 type TypeRegistry = Map<string, PropInfo[]>;
 
@@ -277,7 +277,7 @@ const buildTypeRegistry = (srcDirs: string[]): TypeRegistry => {
 };
 
 /**
- * `src/components/` 配下のすべての `.ts` ファイルから `*Props` インターフェースを収集する．
+ * `src/jsx/components/` 配下のすべての `.ts` ファイルから `*Props` インターフェースを収集する．
  * 追加のディレクトリからも型レジストリを構築し，エイリアスを解決する．
  * @param srcDir コンポーネントソースのディレクトリパス．
  * @param extraTypeDirs エイリアス解決のために参照する追加ディレクトリ（例：`../minitype/src`）．
@@ -482,7 +482,7 @@ const updateMarkdown = (
  * エントリポイント．
  */
 const main = () => {
-  const srcDir = path.join(ROOT, "src/components");
+  const srcDir = path.join(ROOT, "src/jsx/components");
   const docsDir = path.join(ROOT, "docs/components");
   const minitypeSrcDir = path.join(ROOT, "../minitype/src");
 

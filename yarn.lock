@@ -428,10 +428,10 @@
     unist-util-visit "^5.0.0"
     vfile "^6.0.0"
 
-"@minitype/minitype@^0.1.7":
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/@minitype/minitype/-/minitype-0.1.7.tgz#a492038b66f0a6ce9a4382d1ac9895bc4e1c725c"
-  integrity sha512-pEbdAQySkXdwAXHxG++jMXLg8wDh6m2+87ssAKIdNwYLVe0aFbiN+70G2wSbVko7uVH22RWgfyln8Xv9xcz5XA==
+"@minitype/minitype@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@minitype/minitype/-/minitype-0.2.0.tgz#ff6d8a7d53385493eccd8243e9dc54e9e04260ad"
+  integrity sha512-tZJqyeYh5N04oS8BKGqH3j6NKxQ6F1O2YZHI5wVYYREQ2NzgXH8Ecq21L7tZftyKxD7wjpFiuOqb8ZhxvLMutQ==
   dependencies:
     "@citation-js/core" "^0.7.21"
     "@citation-js/plugin-bibtex" "^0.7.21"
@@ -440,7 +440,7 @@
     blob-stream "^0.1.3"
     fast-xml-parser "^5.10.1"
     highlight.js "^11.0.0"
-    hyphenation.en-us "^0.2.1"
+    hyphenated-en-us "^1.2.0"
     hypher "^0.2.5"
     image-size "^2.0.2"
     lowlight "^3.3.0"
@@ -450,7 +450,6 @@
     pdf-lib "^1.17.1"
     pdfjs-dist "~5.4.0"
     pdfkit "^0.17.2"
-    svg-to-pdfkit "^0.1.8"
     yaml "^2.0.0"
     zod "^4.4.3"
 
@@ -525,16 +524,6 @@
     "@napi-rs/canvas-linux-x64-musl" "0.1.100"
     "@napi-rs/canvas-win32-arm64-msvc" "0.1.100"
     "@napi-rs/canvas-win32-x64-msvc" "0.1.100"
-
-"@noble/ciphers@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@noble/ciphers/-/ciphers-1.3.0.tgz#f64b8ff886c240e644e5573c097f86e5b43676dc"
-  integrity sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==
-
-"@noble/hashes@^1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.8.0.tgz#cee43d801fcef9644b11b8194857695acd5f815a"
-  integrity sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==
 
 "@nodable/entities@^3.0.0":
   version "3.0.0"
@@ -1437,11 +1426,6 @@ fetch-ponyfill@^7.1.0:
   dependencies:
     node-fetch "~2.6.1"
 
-fflate@^0.8.2, fflate@^0.8.3:
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.8.3.tgz#bc27d8eb30343d4d512abb03480202ce65d825fc"
-  integrity sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==
-
 file-uri-to-path@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/file-uri-to-path/-/file-uri-to-path-1.0.0.tgz#553a7b8446ff6f684359c445f1e37a05dacc33dd"
@@ -1564,14 +1548,12 @@ husky@^9.1.7:
   resolved "https://registry.yarnpkg.com/husky/-/husky-9.1.7.tgz#d46a38035d101b46a70456a850ff4201344c0b2d"
   integrity sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==
 
-hyphenation.en-us@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/hyphenation.en-us/-/hyphenation.en-us-0.2.1.tgz#6b937323ff40da474ecb8c07eaeb79d6ae28fed8"
-  integrity sha512-ItXYgvIpfN8rfXl/GTBQC7DsSb5PPsKh9gGzViK/iWzCS5mvjDebFJ6xCcIYo8dal+nSp2rUzvTT7BosrKlL8A==
-  dependencies:
-    hypher "*"
+hyphenated-en-us@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/hyphenated-en-us/-/hyphenated-en-us-1.2.0.tgz#03f9e227de7ad302e9c3ffad6fd9a2dbaae1340e"
+  integrity sha512-Tz9OMog//SSMnIOK18MmRumfI+r0goJZZAAVJ1Itho7r9GSZcGrGiIZNYfScAW1hqvFJLu2yRh7haa0YF+8i/Q==
 
-hypher@*, hypher@^0.2.5:
+hypher@^0.2.5:
   version "0.2.5"
   resolved "https://registry.yarnpkg.com/hypher/-/hypher-0.2.5.tgz#2fe456ed2a3fd4ed0d9e428617181c59f9a6dd02"
   integrity sha512-kUTpuyzBWWDO2VakmjHC/cxesg4lKQP+Fdc+7lrK4yvjNjkV9vm5UTZMDAwOyyHTOpbkYrAMlNZHG61NnE9vYQ==
@@ -2589,18 +2571,6 @@ pdfjs-dist@~5.4.0:
     "@napi-rs/canvas" "^0.1.88"
     node-readable-to-web-readable-stream "^0.4.2"
 
-pdfkit@>=0.8.1:
-  version "0.20.2"
-  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.20.2.tgz#6a979d812c75b6bc1b554a0641f699228cc94e61"
-  integrity sha512-Q/w03ICAQyXfHNfTsg1udp0ADerdBN0s7a6XSPL7J7Ro6ABnafoBOCDBstIO9U02mvzHEV8HrvFIw5iV5ejIRA==
-  dependencies:
-    "@noble/ciphers" "^1.3.0"
-    "@noble/hashes" "^1.8.0"
-    fflate "^0.8.3"
-    fontkit "^2.0.4"
-    linebreak "^1.1.0"
-    png-js "^2.0.0"
-
 pdfkit@^0.17.2:
   version "0.17.2"
   resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.17.2.tgz#f77d7129ca49bc5015246b890d1aca6cb6b71f00"
@@ -2628,13 +2598,6 @@ png-js@^1.0.0:
   integrity sha512-PM/uYGzGdNSzqeOgly68+6wKQDL1SY0a/N+OEa/+br6LnHWOAJB0Npiamnodfq3jd2LS/i2fMeOKSAILjA+m5Q==
   dependencies:
     browserify-zlib "^0.2.0"
-
-png-js@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/png-js/-/png-js-2.0.0.tgz#7bc521aea1d47f5e3bf42eeecdd77095cba98d5f"
-  integrity sha512-GdzJuUMc6ZSpxFJWVxtOH1bzYHym+TOnveqUjb+VJIbZWbZzyiRGFiKhbiielfpYbgMlhHVhsJ0FTazfuRFkMA==
-  dependencies:
-    fflate "^0.8.2"
 
 postcss@^8.5.26:
   version "8.5.27"
@@ -3002,13 +2965,6 @@ style-to-object@1.0.14:
   integrity sha512-LIN7rULI0jBscWQYaSswptyderlarFkjQ+t79nzty8tcIAceVomEVlLzH5VP4Cmsv6MtKhs7qaAiwlcp+Mgaxw==
   dependencies:
     inline-style-parser "0.2.7"
-
-svg-to-pdfkit@^0.1.8:
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/svg-to-pdfkit/-/svg-to-pdfkit-0.1.8.tgz#5921765922044843f0c1a5b25ec1ef8a4a33b8af"
-  integrity sha512-QItiGZBy5TstGy+q8mjQTMGRlDDOARXLxH+sgVm1n/LYeo0zFcQlcCh8m4zi8QxctrxB9Kue/lStc/RD5iLadQ==
-  dependencies:
-    pdfkit ">=0.8.1"
 
 sync-fetch@^0.4.1:
   version "0.4.5"

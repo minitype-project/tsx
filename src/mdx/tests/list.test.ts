@@ -7,7 +7,7 @@
 import type * as minitype from "@minitype/minitype";
 import { li1, li2, li3, ol1, ol2, ol3, p } from "@minitype/minitype";
 import { describe, expect, it } from "vitest";
-import { evaluateMdxString } from "../mdx.js";
+import { evaluateMdxString } from "../evaluate.js";
 
 const getBox = async (md: string): Promise<minitype.Box> => {
   const { blocks } = await evaluateMdxString(md);
@@ -201,5 +201,60 @@ paragraph
     expect(step3.blocks).toHaveLength(2);
     expect(step3.blocks[0]).toMatchObject(ol1("順序付き項目 1"));
     expect(step3.blocks[1]).toMatchObject(ol1("順序付き項目 2"));
+  });
+});
+
+describe("リストの要素番号", () => {
+  it("1 以外から始まる順序付きリストの最初の要素に要素番号を設定する", async () => {
+    const box = await getBox(`
+3. item1
+4. item2
+`);
+    expect(box.blocks[0]).toMatchObject({ ...ol1("item1"), start: 3 });
+    expect((box.blocks[1] as minitype.List).start).toBeUndefined();
+  });
+
+  it("1 から始まる順序付きリストには要素番号を設定しない", async () => {
+    const box = await getBox(`
+1. item1
+2. item2
+`);
+    expect((box.blocks[0] as minitype.List).start).toBeUndefined();
+  });
+
+  it("ネストされた順序付きリストの要素番号を保持する", async () => {
+    // 1 以外から始まるリストは段落に割り込めないため，空行を挟む
+    const box = await getBox(`
+1. item1
+
+   3. item2
+`);
+    expect(box.blocks[1]).toMatchObject({ ...ol2("item2"), start: 3 });
+  });
+
+  it("空行で区切られた順序付きリストの番号を要素ごとに引き継ぐ", async () => {
+    const { blocks } = await evaluateMdxString(`
+1. item1
+
+1. item2
+
+1. item3
+`);
+    const result = blocks as minitype.Box[];
+    expect(result.map((box) => (box.blocks[0] as minitype.List).start)).toEqual(
+      [undefined, 2, 3],
+    );
+  });
+
+  it("空行で区切られた順序付きリストで 1 以外の要素番号を引き継ぐ", async () => {
+    const { blocks } = await evaluateMdxString(`
+5. item1
+
+6. item2
+`);
+    const result = blocks as minitype.Box[];
+    expect(result.map((box) => (box.blocks[0] as minitype.List).start)).toEqual(
+      [5, 6],
+    );
   });
 });
