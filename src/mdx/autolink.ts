@@ -4,10 +4,7 @@
  * https://opensource.org/licenses/MIT
  */
 
-/**
- * URL の終端とみなす和文文字・全角文字（U+3000–U+9FFF，U+F900–U+FAFF，U+FF00–U+FFEF）．
- */
-const CJK_OR_FULLWIDTH = /[\u3000-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]/;
+import { CJK_OR_FULLWIDTH } from "../char.js";
 
 /**
  * URL 末尾から除く句読点．
@@ -29,21 +26,22 @@ type AutolinkNode = {
 const getUrlLength = (text: string): number => {
   let depth = 0;
   let end = text.length;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (CJK_OR_FULLWIDTH.test(ch)) {
+  let i = 0;
+  for (const char of text) {
+    if (CJK_OR_FULLWIDTH.test(char)) {
       end = i;
       break;
     }
-    if (ch === "(") {
+    if (char === "(") {
       depth++;
-    } else if (ch === ")") {
+    } else if (char === ")") {
       if (depth === 0) {
         end = i;
         break;
       }
       depth--;
     }
+    i += char.length;
   }
   return text.slice(0, end).replace(TRAILING_PUNCTUATION, "").length;
 };

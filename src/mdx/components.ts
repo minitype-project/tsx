@@ -7,6 +7,7 @@
 import type * as minitype from "@minitype/minitype";
 import { isBlock, ratio } from "@minitype/minitype";
 import {
+  Addkern,
   Addvspace,
   Autoref,
   B,
@@ -38,6 +39,7 @@ import {
   Hbox,
   HeadingInPage,
   Image,
+  IndentHere,
   InlineGraphic,
   InlineMath,
   Kenten,
@@ -60,6 +62,7 @@ import {
   NewColumn,
   NewPage,
   NoBreak,
+  NoBreakSpace,
   NoSplit,
   Num,
   Ol1,
@@ -80,6 +83,7 @@ import {
   StaticBibliographyFile,
   Sub,
   Sup,
+  Tcy,
   Td,
   Toc,
   TocIndex,
@@ -88,6 +92,7 @@ import {
   U,
   Url,
   Vspace,
+  Wbr,
 } from "../index.js";
 import { collectInlineSegments } from "../jsx/children.js";
 import type {
@@ -121,8 +126,9 @@ export type ListBlock = {
 /**
  * {@link mdxCode} がブロックコンテキストで返す，コードブロックのタグ付きラッパー型．
  * {@link mdxPre} がこの型を識別して {@link Code} に変換する．
+ * `pre` を上書きする場合は，{@link isMdxCode} で `children` を判定して用いる．
  */
-type MdxCodeWrapper = {
+export type MdxCodeWrapper = {
   readonly _type: "mdxCode";
   lang?: string;
   meta?: string;
@@ -162,12 +168,14 @@ export const remarkSplitLooseList = () => {
       const newChildren: SplitLooseListNode[] = [];
       for (const child of parent.children) {
         if (child.type === "list" && child.spread && child.children) {
-          for (const item of child.children) {
+          // 分割後も元のリストの番号が続くように，要素ごとに要素番号を設定
+          const start = child.start ?? 1;
+          for (const [index, item] of child.children.entries()) {
             walk(item);
             newChildren.push({
               type: "list",
               ordered: child.ordered,
-              start: 1,
+              start: start + index,
               spread: false,
               children: [item],
             });
@@ -188,20 +196,27 @@ export const remarkSplitLooseList = () => {
  * remark が MDX にコンパイルする際に meta が消えるため，hast のプロパティに移して保持する．
  * `class` 属性と異なり空白で分割されないため，空白を含む meta もそのまま渡る．
  * また，`ts:キャプション` のように `lang` がコロンを含む場合は，コロン以降を meta の先頭に移す．
+ *
+ * hast では `<code>` の `className` でしかコードブロックとインラインコードを区別できず，
+ * `lang` のないコードブロックがインラインコードと誤認されるため，`data-code-type="block"` を付与する．
  */
 export const remarkPreserveCodeMeta = () => {
   return (tree: { children?: unknown[] }) => {
     const walk = (node: PreserveCodeMetaNode) => {
-      const colonIndex = node.lang?.indexOf(":") ?? -1;
-      if (node.type === "code" && node.lang && colonIndex >= 0) {
-        const langMeta = node.lang.slice(colonIndex + 1);
-        node.lang = node.lang.slice(0, colonIndex);
-        node.meta = [langMeta, node.meta].filter(Boolean).join(" ");
-      }
-      if (node.type === "code" && node.meta) {
+      if (node.type === "code") {
+        const colonIndex = node.lang?.indexOf(":") ?? -1;
+        if (node.lang && colonIndex >= 0) {
+          const langMeta = node.lang.slice(colonIndex + 1);
+          node.lang = node.lang.slice(0, colonIndex) || null;
+          node.meta = [langMeta, node.meta].filter(Boolean).join(" ");
+        }
         node.data = {
           ...node.data,
-          hProperties: { ...node.data?.hProperties, "data-meta": node.meta },
+          hProperties: {
+            ...node.data?.hProperties,
+            "data-code-type": "block",
+            ...(node.meta && { "data-meta": node.meta }),
+          },
         };
         node.meta = null;
       }
@@ -233,7 +248,7 @@ const isMdxLi = (value: unknown): value is MdxLiWrapper => {
 /**
  * `value` が {@link MdxCodeWrapper} かどうかを判定する．
  */
-const isMdxCode = (value: unknown): value is MdxCodeWrapper => {
+export const isMdxCode = (value: unknown): value is MdxCodeWrapper => {
   return (
     typeof value === "object" &&
     value !== null &&
@@ -423,20 +438,29 @@ const mdxUl = ({ children }: Record<string, unknown>): ListBlock => {
  * 脚注リスト（remark-gfm が生成する `<li id="user-content-fn-*">`）は
  * {@link minitype.Footnote} としてそのまま返す．
  * ネストされた `<ul>`/`<ol>` は `level` を 1 つインクリメントしてフラットに並べる．
+ * `start` 属性（`3. item` のように 1 以外から始まるリスト）は，最初の要素の要素番号に設定する．
  */
 const mdxOl = ({
   children,
+  start,
 }: Record<string, unknown>): ListBlock | minitype.Footnote[] => {
   const filtered = filterWhitespace(children);
   const items = Array.isArray(filtered) ? (filtered as unknown[]) : [filtered];
   const footnotes: minitype.Footnote[] = [];
+  // MDX は `start` 属性を文字列として渡す
+  const startNumber =
+    typeof start === "string" && /^\d+$/.test(start)
+      ? Number.parseInt(start, 10)
+      : undefined;
 
-  const listItems = items.flatMap((item) => {
+  const listItems = items.flatMap((item, index) => {
     if (isMdxFootnote(item)) {
       footnotes.push(item);
       return [];
     }
-    return convertLiItem(item, (c) => Ol1({ children: c }));
+    return convertLiItem(item, (c) =>
+      Ol1({ children: c, start: index === 0 ? startNumber : undefined }),
+    );
   });
 
   return listItems.length > 0
@@ -452,6 +476,7 @@ const mdxOl = ({
 const mdxCode = ({
   className,
   children,
+  "data-code-type": dataCodeType,
   "data-meta": dataMeta,
 }: Record<string, unknown>): JsxElement => {
   const childStr =
@@ -466,14 +491,16 @@ const mdxCode = ({
       : undefined;
   // remarkPreserveCodeMeta が meta を data-meta 属性として渡す
   const meta = typeof dataMeta === "string" ? dataMeta : undefined;
-  // インラインコード（className なし）は直接 Command に変換する．
-  // ブロックコード（className="language-*"）は MdxCodeWrapper を返して mdxPre に処理させる．
-  if (lang === undefined) {
+  // コードブロック（remarkPreserveCodeMeta が data-code-type="block" を付与）と
+  // remark-math の数式ブロック（className="language-math math-display"）は
+  // MdxCodeWrapper を返して mdxPre に処理させる．
+  // それ以外はインラインコードとして Command に変換する．
+  if (dataCodeType !== "block" && lang === undefined) {
     return Command({ children: childStr, name: "c" });
   }
   return {
     _type: "mdxCode",
-    lang,
+    ...(lang !== undefined && { lang }),
     ...(meta !== undefined && { meta }),
     content: childStr,
   } as unknown as JsxElement;
@@ -708,6 +735,7 @@ export const defaultComponents = {
   StaticBibliographyFile,
   // インライン
   U,
+  Tcy,
   Overline,
   Color,
   FontSize,
@@ -721,9 +749,13 @@ export const defaultComponents = {
   br: Br,
   Br,
   Fbr,
+  Wbr,
   Kern,
+  Addkern,
   NoBreak,
+  NoBreakSpace,
   NoSplit,
+  IndentHere,
   Cid,
   // 参照・ページ番号
   Ref,

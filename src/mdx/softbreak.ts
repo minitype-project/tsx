@@ -4,20 +4,21 @@
  * https://opensource.org/licenses/MIT
  */
 
+import { CJK_OR_FULLWIDTH } from "../char.js";
 import type { InlineChildren } from "../jsx/jsx-runtime.js";
 
 /**
- * 文字が和文かどうかを判定する．
- * 和文：CJK 統合漢字，ひらがな，カタカナ，全角文字（U+3000–U+9FFF，U+F900–U+FAFF，U+FF00–U+FFEF）
- * 欧文：その他
+ * 文字列の先頭の文字（コードポイント単位）を返す．
  */
-const isJapanese = (char: string): boolean => {
-  const code = char.codePointAt(0) ?? 0;
-  return (
-    (code >= 0x3000 && code <= 0x9fff) ||
-    (code >= 0xf900 && code <= 0xfaff) ||
-    (code >= 0xff00 && code <= 0xffef)
-  );
+const firstChar = (s: string): string => {
+  return String.fromCodePoint(s.codePointAt(0) ?? 0);
+};
+
+/**
+ * 文字列の末尾の文字（コードポイント単位）を返す．
+ */
+const lastChar = (s: string): string => {
+  return Array.from(s).at(-1) ?? "";
 };
 
 /**
@@ -27,7 +28,7 @@ const isJapanese = (char: string): boolean => {
 const getFirstTextChar = (value: unknown): string | null => {
   if (typeof value === "string") {
     const s = value.replace(/\n/g, "");
-    return s.length > 0 ? s[0] : null;
+    return s.length > 0 ? firstChar(s) : null;
   }
   if (typeof value === "number") {
     return String(value)[0];
@@ -57,7 +58,7 @@ const getFirstTextChar = (value: unknown): string | null => {
 const getLastTextChar = (value: unknown): string | null => {
   if (typeof value === "string") {
     const s = value.replace(/\n/g, "");
-    return s.length > 0 ? s[s.length - 1] : null;
+    return s.length > 0 ? lastChar(s) : null;
   }
   if (typeof value === "number") {
     const s = String(value);
@@ -120,7 +121,7 @@ export const normalizeMdxSoftBreaks = (
         let prevChar: string | null = null;
         const prevPart = parts[j - 1];
         if (prevPart.length > 0) {
-          prevChar = prevPart[prevPart.length - 1];
+          prevChar = lastChar(prevPart);
         } else {
           for (let k = result.length - 1; k >= 0; k--) {
             // { type: "br" } による改行に達したら探索を停止
@@ -142,13 +143,13 @@ export const normalizeMdxSoftBreaks = (
         let nextChar: string | null = null;
         const nextPart = parts[j];
         if (nextPart.length > 0) {
-          nextChar = nextPart[0];
+          nextChar = firstChar(nextPart);
         } else {
           // 残りのパーツから先頭文字を探索
           let found = false;
           for (let k = j + 1; k < parts.length; k++) {
             if (parts[k].length > 0) {
-              nextChar = parts[k][0];
+              nextChar = firstChar(parts[k]);
               found = true;
               break;
             }
@@ -169,8 +170,8 @@ export const normalizeMdxSoftBreaks = (
         if (
           prevChar !== null &&
           nextChar !== null &&
-          !isJapanese(prevChar) &&
-          !isJapanese(nextChar)
+          !CJK_OR_FULLWIDTH.test(prevChar) &&
+          !CJK_OR_FULLWIDTH.test(nextChar)
         ) {
           result.push(" ");
         }

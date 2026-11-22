@@ -111,3 +111,11 @@ describe("自動リンクの終端", () => {
     ).toBe("[https://example.com/あ](https://example.com/%E3%81%82)");
   });
 });
+
+describe("自動リンクの終端（サロゲートペア）", () => {
+  it("CJK 統合漢字拡張 B の文字の直前で URL を打ち切る", async () => {
+    expect(await render("https://example.com𠮟る")).toBe(
+      "[https://example.com](https://example.com)𠮟る",
+    );
+  });
+});

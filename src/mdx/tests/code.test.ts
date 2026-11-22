@@ -54,3 +54,18 @@ it("meta のないコードフェンスには meta を付与しない", async ()
     content: "a\n",
   });
 });
+
+it("lang のないコードブロックをインラインコードと誤認しない", async () => {
+  expect(await getCode("```\na\n```")).toEqual({
+    _type: "mdxCode",
+    content: "a\n",
+  });
+});
+
+it("コロンから始まる info 文字列を meta として保持する", async () => {
+  expect(await getCode("```:キャプション#lst:a\na\n```")).toEqual({
+    _type: "mdxCode",
+    meta: "キャプション#lst:a",
+    content: "a\n",
+  });
+});

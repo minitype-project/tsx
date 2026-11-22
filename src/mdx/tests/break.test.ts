@@ -163,3 +163,10 @@ describe("脚注内の改行", () => {
     },
   );
 });
+
+describe("ソフト改行（サロゲートペア）", () => {
+  it("CJK 統合漢字拡張 B の文字を和文として扱う", async () => {
+    expect((await getP("𠮟\n和文")).lines).toEqual([["𠮟", "和文"]]);
+    expect((await getP("和文\n𠮟")).lines).toEqual([["和文", "𠮟"]]);
+  });
+});

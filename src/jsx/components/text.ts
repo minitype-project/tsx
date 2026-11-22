@@ -159,19 +159,39 @@ export interface ListProps extends AbstractBlockProps {
   children?: InlineChildren;
   /** リストスタイル． */
   style?: Partial<TextStyle & ListStyle>;
+  /**
+   * 要素番号．
+   * 指定した場合，同じリストの以降の要素はこの番号からカウントする．
+   */
+  start?: number;
+  /**
+   * 直前のリストの番号を引き継ぐかどうか．
+   * リスト以外のブロックを挟んで番号を続ける場合に，リストの最初の要素に指定する．
+   * @default false
+   */
+  resume?: boolean;
 }
 
 const makeList = <L extends "unordered" | "ordered", N extends 1 | 2 | 3>(
   listType: L,
   level: N,
 ) => {
-  return ({ children, style, label, id }: ListProps): minitype.List => {
+  return ({
+    children,
+    style,
+    start,
+    resume,
+    label,
+    id,
+  }: ListProps): minitype.List => {
     return {
       type: "list",
       listType,
       level,
       lines: collectInlineLines(children),
       style,
+      start,
+      resume,
       label,
       id,
     };
